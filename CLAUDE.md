@@ -75,10 +75,14 @@ Single-file vanilla-JS dashboard, `supabase-js` from CDN, 10 tabs (Overview,
 Milestones, Budget & payments, Invoices, Permits, Decision log, Change requests,
 Future work, Vendors, Documents). Login/signup shell → `is_member()` gate →
 `is_owner()` decides read-only vs editable. Every write goes through RLS and
-also appends to `activity_log`. The Overview "Attention" panel is the v1 alerts
-feature (deterministic date math): prominent delay-penalty banner, material-
-advance PoP/PoD compliance flags, and the next-milestone approval gate (Director
-de Obra, Paz y Salvo H2+, gating permits per `MILESTONE_PERMIT_GATES`).
+also appends to `activity_log`. **EN / ES** via the `t()` helper + `I18N` dict +
+the header toggle (persisted to `localStorage['bripo_lang']`); user-entered data
+is never translated, only the chrome. The Overview "Attention" panel is the v1
+alerts feature (deterministic date math): prominent delay-penalty banner,
+material-advance PoP/PoD compliance flags, the next-milestone approval gate
+(Director de Obra, Paz y Salvo H2+, gating permits per `MILESTONE_PERMIT_GATES`),
+milestone-slipping (in-progress past planned date) and bookkeeping-drift
+(milestone status vs recorded disbursements) checks.
 
 - **% complete** = Σ(contract_amount of milestones where status='complete') / 73500.
 - **Amount due at a milestone** = `milestones.contract_amount − Σ(payments.amount

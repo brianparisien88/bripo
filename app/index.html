@@ -23,15 +23,15 @@
     text-transform:uppercase;letter-spacing:.04em;}
   .sub{color:var(--muted);font-size:13px;}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-  .spread{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .spread{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
 
-  /* login */
   .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
     padding:22px;max-width:380px;}
   label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px;}
   input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);
     color:var(--text);border-radius:6px;padding:8px 10px;font-size:13px;outline:none;font-family:inherit;}
   input[type=checkbox]{width:auto;}
+  td select{min-width:7.5em;}
   textarea{min-height:56px;resize:vertical;}
   button{background:var(--accent);border:0;color:#fff;border-radius:6px;
     padding:8px 15px;font-size:13px;font-weight:500;cursor:pointer;}
@@ -42,24 +42,24 @@
   .msg.err{color:var(--red);}
   .hide{display:none!important;}
 
-  /* nav */
+  .langtoggle{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;flex:none;}
+  .langtoggle button{background:var(--surface);color:var(--muted);border:0;border-radius:0;
+    padding:5px 10px;font-size:12px;font-weight:600;}
+  .langtoggle button.active{background:var(--surface2);color:var(--text);}
+
   nav{display:flex;gap:2px;flex-wrap:wrap;border-bottom:1px solid var(--border);margin:16px 0 6px;}
   nav button{background:none;color:var(--muted);border:0;border-bottom:2px solid transparent;
     border-radius:0;padding:8px 12px;font-size:13px;}
   nav button.active{color:var(--text);border-bottom-color:var(--accent);}
 
-  /* tiles */
   .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0;}
   .tile{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:13px 15px;}
   .tile .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
   .tile .v{font-size:20px;margin-top:3px;font-variant-numeric:tabular-nums;}
-  .tile .v.mono{font-family:var(--mono);font-size:18px;}
 
-  /* progress bar */
   .bar{height:9px;background:var(--surface2);border-radius:5px;overflow:hidden;margin:8px 0;}
   .bar > i{display:block;height:100%;background:var(--green);}
 
-  /* tables */
   table{width:100%;border-collapse:collapse;font-size:13px;}
   th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--border);vertical-align:top;}
   th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em;}
@@ -67,7 +67,6 @@
   tr.sub-row td{background:var(--surface);color:var(--muted);font-size:12px;}
   .tbl-scroll{overflow-x:auto;}
 
-  /* pills */
   .pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:600;
     border:1px solid var(--border);white-space:nowrap;}
   .pill.green{color:var(--green);border-color:#1f5a2c;background:#12321c;}
@@ -75,7 +74,6 @@
   .pill.red{color:var(--red);border-color:#5a2320;background:#331816;}
   .pill.dim{color:var(--dim);}
 
-  /* attention panel */
   .flag{display:flex;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;
     margin:8px 0;background:var(--surface);}
   .flag .dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex:none;}
@@ -106,29 +104,29 @@
   <div class="spread">
     <div>
       <h1>bripo</h1>
-      <div class="sub">Altos de Maria construction dashboard</div>
+      <div class="sub" id="appSubtitle">Altos de María construction dashboard</div>
     </div>
-    <div id="sessionBox" class="row hide">
-      <span class="sub" id="who"></span>
-      <button id="logoutBtn" class="ghost sm">Sign out</button>
+    <div class="row" style="gap:14px;align-items:center;">
+      <div id="langToggle" class="langtoggle"></div>
+      <div id="sessionBox" class="row hide">
+        <span class="sub" id="who"></span>
+        <button id="logoutBtn" class="ghost sm">Sign out</button>
+      </div>
     </div>
   </div>
 
   <!-- LOGIN -->
   <div id="login" class="card" style="margin-top:22px;">
-    <label>Email</label>
+    <label id="lblEmail">Email</label>
     <input id="email" type="email" autocomplete="username">
-    <label>Password</label>
+    <label id="lblPassword">Password</label>
     <input id="password" type="password" autocomplete="current-password">
     <div class="row" style="margin-top:16px;">
       <button id="loginBtn">Sign in</button>
       <button id="signupBtn" class="ghost">Create account</button>
     </div>
     <div id="loginMsg" class="msg"></div>
-    <div class="sub" style="margin-top:14px;font-size:11px;">
-      Access is controlled server-side (Supabase RLS). A new account sees nothing
-      until the owner adds it to the allow-list.
-    </div>
+    <div class="sub" id="loginNote" style="margin-top:14px;font-size:11px;"></div>
   </div>
 
   <!-- APP -->
@@ -136,12 +134,8 @@
     <nav id="nav"></nav>
     <div id="view"></div>
     <details class="raw">
-      <summary>schema / raw</summary>
-      <div class="sub" style="margin-top:8px;">
-        Project <code>mxjoxxckekgtlvbmpkbd</code> &middot; USD only &middot; all figures from
-        the signed contract (Art 2.1, fixed price). Money math is deterministic
-        (no LLM): % complete, advance netting, the $250/week delay penalty.
-      </div>
+      <summary id="rawSummary">schema / raw</summary>
+      <div class="sub" id="rawNote" style="margin-top:8px;"></div>
     </details>
   </div>
 </div>
@@ -152,8 +146,8 @@
 /* ------------------------------------------------------------------ *
  * bripo v1 dashboard — single file, vanilla JS, supabase-js + RLS.
  * The publishable key below is the anon role; every table's RLS policy
- * requires an allow-listed auth.uid() before a row is returned. Nothing
- * is baked in at build time.
+ * requires an allow-listed auth.uid() before a row is returned.
+ * EN / ES via the t() helper + the header toggle (persisted per browser).
  * ------------------------------------------------------------------ */
 const SUPABASE_URL = 'https://mxjoxxckekgtlvbmpkbd.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_wmwbM7-UkcdcLOwg3AmUPQ_eDu-XwK8';
@@ -173,6 +167,337 @@ const h  = (tag, attrs = {}, kids = []) => {
   return n;
 };
 
+/* ---------------- i18n ---------------- */
+let LANG = 'en';
+try { LANG = localStorage.getItem('bripo_lang') || 'en'; } catch (e) {}
+if (LANG !== 'en' && LANG !== 'es') LANG = 'en';
+
+const I18N = {
+  en: {
+    'app.subtitle': 'Altos de María construction dashboard',
+    'app.signout': 'Sign out',
+    'role.owner': 'owner', 'role.viewer': 'viewer', 'role.none': 'not on the allow-list',
+    'readonly': 'Read-only — this account is not the owner.',
+    'login.email': 'Email', 'login.password': 'Password',
+    'login.signin': 'Sign in', 'login.signup': 'Create account',
+    'login.signingin': 'Signing in…', 'login.creating': 'Creating account…',
+    'login.note': 'Access is controlled server-side (Supabase RLS). A new account sees nothing until the owner adds it to the allow-list.',
+    'login.created': 'Account created. If email confirmation is on, confirm then sign in. Then the owner adds you to the allow-list.',
+    'login.notmember': 'This account ({email}) is authenticated but not on the allow-list, so no data is visible.',
+    'login.notmember2': 'The owner adds it with:',
+    'raw.summary': 'schema / raw',
+    'raw.note': 'Project mxjoxxckekgtlvbmpkbd · USD only · all figures from the signed contract (Art 2.1, fixed price). Money math is deterministic (no LLM): % complete, advance netting, the $250/week delay penalty.',
+
+    'nav.overview': 'Overview', 'nav.milestones': 'Milestones', 'nav.budget': 'Budget & payments',
+    'nav.invoices': 'Invoices', 'nav.permits': 'Permits', 'nav.decisions': 'Decision log',
+    'nav.changes': 'Change requests', 'nav.future': 'Future work', 'nav.vendors': 'Vendors',
+    'nav.documents': 'Documents',
+
+    'common.cancel': 'Cancel', 'common.saved': 'Saved.', 'common.confirmDelete': 'Delete this row?',
+
+    'col.date': 'Date', 'col.party': 'Party', 'col.summary': 'Summary', 'col.resolves': 'Resolves',
+    'col.source': 'Source', 'col.confirmed': 'Confirmed', 'col.status': 'Status',
+    'col.planned': 'Planned', 'col.actual': 'Actual', 'col.milestone': 'Milestone', 'col.amount': 'Amount',
+    'col.recipient': 'Recipient', 'col.category': 'Category', 'col.notes': 'Notes', 'col.vendor': 'Vendor',
+    'col.received': 'Received', 'col.applied': 'Applied', 'col.uploaded': 'Uploaded',
+    'col.filename': 'Filename', 'col.linked': 'Linked', 'col.responsible': 'Responsible',
+    'col.completed': 'Completed', 'col.estCost': 'Est. cost', 'col.potentialVendor': 'Potential vendor',
+    'col.timeSensitive': 'Time-sensitive', 'col.cost': 'Cost', 'col.schedDays': 'Sched (d)',
+    'col.owner': 'Owner', 'col.developer': 'Developer', 'col.evidence': 'Evidence',
+    'col.contract': 'Contract', 'col.dueNet': 'Due (net adv.)', 'col.advances': 'Advances',
+    'col.disbursed': 'Disbursed', 'col.dueAtCompletion': 'Due at completion',
+    'col.pop': 'PoP', 'col.popDeadline': 'PoP deadline', 'col.pod': 'PoD',
+    'col.pazYSalvo': 'Paz y Salvo', 'col.dirDeObra': 'Dir. de Obra',
+    'col.permitType': 'Permit / approval', 'col.submitted': 'Submitted', 'col.description': 'Description',
+    'col.name': 'Name', 'col.role': 'Role', 'col.phone': 'Phone', 'col.email': 'Email', 'col.num': '#',
+
+    'overview.tile.contract': 'Contract value', 'overview.tile.pct': '% complete',
+    'overview.tile.paid': 'Paid to date', 'overview.tile.remaining': 'Remaining',
+    'overview.milestonesComplete': '{done} of {total} milestones complete.',
+    'overview.schedule': 'Schedule',
+    'overview.clockNotStarted': '21-week contract clock has not started',
+    'overview.clockNotStartedDetail': 'Set the H1 disbursement date in Budget & payments once H1 is paid — that starts the clock and the delay-penalty math (Art 7.1).',
+    'overview.tile.h1': 'H1 disbursement', 'overview.tile.weeks': 'Weeks elapsed',
+    'overview.tile.deadline': 'Contract deadline', 'overview.tile.penalty': 'Delay penalty',
+    'overview.attention': 'Attention',
+    'overview.nothingFlagged': 'Nothing flagged. Schedule, advances and the next milestone gate all look clear.',
+    'overview.recentDecisions': 'Recent decisions',
+    'overview.noConfirmedDecisions': 'No confirmed decisions logged yet.',
+
+    'flag.delay.capTitle': 'Delay penalty at the {cap} cap — contract termination trigger (Art 4.1e)',
+    'flag.delay.title': 'Potential delay penalty: {penalty}',
+    'flag.delay.detail': '{weeksElapsed} weeks elapsed since H1 disbursement ({h1}); {weeksAllowed} allowed. {overWeeks} week(s) over × {perWeek}/wk (unjustified delay, Art 7 / cap {cap}).',
+    'flag.pop.overdueTitle': 'Proof-of-purchase overdue — {label}',
+    'flag.pop.overdueDetail': 'Paid vendor receipt was due {deadline} (10 business days after disbursement, Art 2.5). Not on file.',
+    'flag.pop.pendingTitle': 'Proof-of-purchase pending — {label}',
+    'flag.pop.pendingDetail': 'Paid vendor receipt not yet received{due}.',
+    'flag.pop.due': ' (due {deadline})',
+    'flag.pod.title': 'Proof-of-delivery pending — {label}',
+    'flag.pod.detail': 'No confirmation materials arrived at the lot. Required before the next milestone pays out (Art 2.5).',
+    'flag.director.title': '{m} — Director de Obra sign-off not recorded',
+    'flag.director.detail': "Every milestone disbursement needs the independent inspector's approval (Art 2.1).",
+    'flag.paz.title': '{m} — Paz y Salvo not on file',
+    'flag.paz.detail': 'Worker-payment clearance required before disbursement from H2 onward (Art 2.2).',
+    'flag.permit.title': '{m} gate — "{permit}" not approved',
+    'flag.permit.detail': 'Status: {status}. Required before {m}.',
+    'flag.warranty.title': 'Warranty clocks running from final delivery {fd}',
+    'flag.warranty.detail': 'Labour/materials 2-yr expires {y2} (Art 8.1); structural decennial 10-yr expires {y10} (Art 8.2).',
+    'flag.slip.title': '{m} in progress past its planned date ({planned})',
+    'flag.slip.detail': '{days} day(s) past plan and not yet complete — update the planned date or mark the milestone delayed.',
+    'flag.drift.completeNoPay.title': '{m} marked complete but no disbursement recorded',
+    'flag.drift.completeNoPay.detail': 'No milestone_disbursement payment is linked to {m}. Record the payment or re-check the status.',
+    'flag.drift.payNotComplete.title': '{m} has a disbursement but is not marked complete',
+    'flag.drift.payNotComplete.detail': '{amount} disbursed against {m} while its status is "{status}".',
+
+    'milestones.heading': 'Milestones (H1–H8)',
+    'milestones.sub': 'Schedule and split from the signed contract (Art 2.1). Amount due nets material advances against the milestone total.',
+    'milestones.approvalGate': 'Approval gate:', 'milestones.notesLabel': 'Notes:',
+    'milestones.notesPlaceholder': 'Director de Obra name / date, inspection refs…',
+    'milestones.payments': 'Payments:', 'milestones.noPayments': 'No payments linked.',
+
+    'budget.contract': 'Contract',
+    'budget.meta.h1': 'H1 disbursement date',
+    'budget.meta.h1hint': 'Starts the 21-week clock and the penalty math (Art 7.1).',
+    'budget.meta.final': 'Final delivery date',
+    'budget.meta.finalhint': 'Starts both warranty clocks (Art 8).',
+    'budget.meta.weeks': 'Weeks allowed', 'budget.meta.perWeek': 'Delay penalty / week',
+    'budget.meta.cap': 'Delay penalty cap',
+    'budget.budget': 'Budget', 'budget.tile.contracted': 'Contracted',
+    'budget.tile.advOutstanding': 'Advances outstanding vs milestones',
+    'budget.payments': 'Payments', 'budget.addPayment': '+ Add payment',
+    'budget.popPodLegend': 'PoP = proof of purchase (paid vendor receipt, due 10 business days after a material advance). PoD = proof of delivery to the lot. Both gate the next milestone payout (Art 2.5).',
+    'budget.form.amount': 'Amount (USD)', 'budget.form.type': 'Type',
+    'budget.type.disb': 'milestone disbursement', 'budget.type.adv': 'material advance',
+    'budget.form.method': 'Method', 'budget.form.methodPh': 'wire / cheque…',
+    'budget.form.advCat': 'Advance category', 'budget.form.advCatPh': '— (advances only)',
+    'budget.form.popDeadline': 'PoP deadline', 'budget.form.savePayment': 'Save payment',
+    'budget.form.paymentHint': 'For a material advance, set the PoP deadline to 10 business days after the disbursement date.',
+    'budget.toast.paymentReq': 'Date, amount and type are required.',
+
+    'row.advance': 'advance', 'row.disbursement': 'disbursement',
+    'pill.ok': 'ok', 'pill.check': 'check',
+    'adv.steel': 'steel', 'adv.huurre_panels': 'huurre panels',
+    'adv.roof_structure': 'roof structure', 'adv.electrical_cable': 'electrical cable',
+
+    'invoices.heading': 'Invoices received', 'invoices.add': '+ Add invoice',
+    'invoices.linkHeading': 'Payment ↔ invoice links (many-to-many)',
+    'invoices.linkSub': 'Matching is rarely 1:1 — one payment can cover several invoices, one invoice can be paid across several payments.',
+    'invoices.form.dateReceived': 'Date received', 'invoices.form.saveInvoice': 'Save invoice',
+    'invoices.link.payment': 'Payment', 'invoices.link.invoice': 'Invoice',
+    'invoices.link.amountApplied': 'Amount applied', 'invoices.link.link': 'Link',
+    'invoices.toast.invoiceReq': 'Date, vendor and amount are required.',
+    'invoices.toast.linkReq': 'All three fields are required.',
+
+    'permits.heading': 'Permits & hard gates',
+    'permits.sub': 'Status + document tracking only. CAR insurance is listed here because it is a hard gate before H1 (Art 5.3).',
+    'permits.responsiblePh': 'contractor / owner',
+
+    'decisions.heading': 'Decision / change log', 'decisions.add': '+ Add entry',
+    'decisions.sub': 'Anything from email / WhatsApp / paper that changes scope, price or schedule. Manual entry for v1. "Confirmed" is the "it does not count until you say so" gate.',
+    'decisions.awaiting': 'Awaiting confirmation ({n})', 'decisions.confirmed': 'Confirmed',
+    'decisions.nothing': 'Nothing here.',
+    'decisions.form.partyPh': 'who', 'decisions.form.resolvesPh': 'Art / scope item',
+    'decisions.form.summaryLabel': 'Summary / quoted text', 'decisions.form.confirmedLabel': 'confirmed',
+    'decisions.form.saveEntry': 'Save entry', 'decisions.toast.req': 'Date and summary are required.',
+    'source.whatsapp': 'whatsapp', 'source.email': 'email', 'source.manual': 'manual', 'source.other': 'other',
+
+    'changes.heading': 'Change requests', 'changes.add': '+ New request',
+    'changes.sub': 'Modifications to the live Bripo contract, two-party sign-off. No automatic budget/milestone recalculation in v1 — log it flat.',
+    'changes.form.costImpact': 'Cost impact (USD)', 'changes.form.schedImpact': 'Schedule impact (days)',
+    'changes.form.saveRequest': 'Save request', 'changes.form.evidencePh': 'email confirmation…',
+    'changes.toast.req': 'Description is required.',
+
+    'future.heading': 'Future / independent work items', 'future.add': '+ Add item',
+    'future.sub': 'Scope you are considering that is NOT a modification to the signed Bripo contract — could become its own contract, possibly a different vendor. Not routed through change-request sign-off.',
+    'future.form.estCost': 'Estimated cost (USD)', 'future.form.timeSensitive': 'Time-sensitive note',
+    'future.form.saveItem': 'Save item', 'future.toast.req': 'Description is required.',
+
+    'vendors.heading': 'Vendors & contacts', 'vendors.add': '+ Add vendor',
+    'vendors.form.saveVendor': 'Save vendor', 'vendors.toast.req': 'Name is required.',
+
+    'documents.heading': 'Documents',
+    'documents.sub': 'Metadata index for files stored in the private "documents" Supabase Storage bucket (same RLS). Never store a public link. No cédula / RUC numbers.',
+    'documents.form.file': 'File', 'documents.form.linkedTo': 'Linked to',
+    'documents.form.entityId': 'Entity id', 'documents.form.entityIdPh': 'e.g. H2',
+    'documents.form.upload': 'Upload', 'documents.toast.chooseFile': 'Choose a file.',
+
+    'st.not_started': 'not started', 'st.in_progress': 'in progress', 'st.pending_inspection': 'pending inspection',
+    'st.complete': 'complete', 'st.delayed': 'delayed',
+    'st.submitted': 'submitted', 'st.under_review': 'under review', 'st.approved': 'approved',
+    'st.unmatched': 'unmatched', 'st.partially_matched': 'partially matched', 'st.matched': 'matched',
+    'st.proposed': 'proposed', 'st.rejected': 'rejected', 'st.superseded': 'superseded',
+    'st.idea': 'idea', 'st.quoted': 'quoted', 'st.contracted': 'contracted', 'st.declined': 'declined',
+    'st.pending': 'pending',
+    'ent.milestone': 'milestone', 'ent.permit': 'permit', 'ent.payment': 'payment',
+    'ent.invoice': 'invoice', 'ent.vendor': 'vendor', 'ent.change_request': 'change request',
+  },
+  es: {
+    'app.subtitle': 'Panel de construcción — Altos de María',
+    'app.signout': 'Cerrar sesión',
+    'role.owner': 'propietario', 'role.viewer': 'observador', 'role.none': 'sin acceso autorizado',
+    'readonly': 'Solo lectura — esta cuenta no es la del propietario.',
+    'login.email': 'Correo', 'login.password': 'Contraseña',
+    'login.signin': 'Iniciar sesión', 'login.signup': 'Crear cuenta',
+    'login.signingin': 'Iniciando sesión…', 'login.creating': 'Creando cuenta…',
+    'login.note': 'El acceso se controla en el servidor (Supabase RLS). Una cuenta nueva no ve nada hasta que el propietario la agregue a la lista de acceso.',
+    'login.created': 'Cuenta creada. Si la confirmación por correo está activa, confírmela e inicie sesión. Luego el propietario la agregará a la lista de acceso.',
+    'login.notmember': 'Esta cuenta ({email}) está autenticada pero no está en la lista de acceso, así que no se muestran datos.',
+    'login.notmember2': 'El propietario la agrega con:',
+    'raw.summary': 'esquema / técnico',
+    'raw.note': 'Proyecto mxjoxxckekgtlvbmpkbd · Solo USD · todas las cifras provienen del contrato firmado (Art 2.1, precio fijo). Los cálculos son deterministas (sin IA): % completado, descuento de anticipos y la penalización de $250/semana.',
+
+    'nav.overview': 'Resumen', 'nav.milestones': 'Hitos', 'nav.budget': 'Presupuesto y pagos',
+    'nav.invoices': 'Facturas', 'nav.permits': 'Permisos', 'nav.decisions': 'Registro de decisiones',
+    'nav.changes': 'Órdenes de cambio', 'nav.future': 'Trabajo futuro', 'nav.vendors': 'Proveedores',
+    'nav.documents': 'Documentos',
+
+    'common.cancel': 'Cancelar', 'common.saved': 'Guardado.', 'common.confirmDelete': '¿Eliminar este registro?',
+
+    'col.date': 'Fecha', 'col.party': 'Parte', 'col.summary': 'Resumen', 'col.resolves': 'Resuelve',
+    'col.source': 'Fuente', 'col.confirmed': 'Confirmado', 'col.status': 'Estado',
+    'col.planned': 'Planificada', 'col.actual': 'Real', 'col.milestone': 'Hito', 'col.amount': 'Monto',
+    'col.recipient': 'Beneficiario', 'col.category': 'Categoría', 'col.notes': 'Notas', 'col.vendor': 'Proveedor',
+    'col.received': 'Recibida', 'col.applied': 'Aplicado', 'col.uploaded': 'Subido',
+    'col.filename': 'Archivo', 'col.linked': 'Vinculado', 'col.responsible': 'Responsable',
+    'col.completed': 'Completado', 'col.estCost': 'Costo est.', 'col.potentialVendor': 'Proveedor potencial',
+    'col.timeSensitive': 'Urgente', 'col.cost': 'Costo', 'col.schedDays': 'Cronog. (d)',
+    'col.owner': 'Propietario', 'col.developer': 'Contratista', 'col.evidence': 'Evidencia',
+    'col.contract': 'Contrato', 'col.dueNet': 'A pagar (neto ant.)', 'col.advances': 'Anticipos',
+    'col.disbursed': 'Desembolsado', 'col.dueAtCompletion': 'A pagar al completar',
+    'col.pop': 'Compra', 'col.popDeadline': 'Límite compra', 'col.pod': 'Entrega',
+    'col.pazYSalvo': 'Paz y Salvo', 'col.dirDeObra': 'Dir. de Obra',
+    'col.permitType': 'Permiso / aprobación', 'col.submitted': 'Enviada', 'col.description': 'Descripción',
+    'col.name': 'Nombre', 'col.role': 'Rol', 'col.phone': 'Teléfono', 'col.email': 'Correo', 'col.num': '#',
+
+    'overview.tile.contract': 'Valor del contrato', 'overview.tile.pct': '% completado',
+    'overview.tile.paid': 'Pagado a la fecha', 'overview.tile.remaining': 'Restante',
+    'overview.milestonesComplete': '{done} de {total} hitos completados.',
+    'overview.schedule': 'Cronograma',
+    'overview.clockNotStarted': 'El plazo contractual de 21 semanas no ha iniciado',
+    'overview.clockNotStartedDetail': 'Registre la fecha de desembolso de H1 en Presupuesto y pagos cuando se pague H1 — eso inicia el plazo y el cálculo de penalización por retraso (Art 7.1).',
+    'overview.tile.h1': 'Desembolso H1', 'overview.tile.weeks': 'Semanas transcurridas',
+    'overview.tile.deadline': 'Fecha límite del contrato', 'overview.tile.penalty': 'Penalización por retraso',
+    'overview.attention': 'Atención',
+    'overview.nothingFlagged': 'Nada señalado. El cronograma, los anticipos y la puerta del siguiente hito están en orden.',
+    'overview.recentDecisions': 'Decisiones recientes',
+    'overview.noConfirmedDecisions': 'Aún no hay decisiones confirmadas registradas.',
+
+    'flag.delay.capTitle': 'Penalización por retraso en el tope de {cap} — causal de terminación del contrato (Art 4.1e)',
+    'flag.delay.title': 'Penalización por retraso potencial: {penalty}',
+    'flag.delay.detail': '{weeksElapsed} semanas desde el desembolso de H1 ({h1}); {weeksAllowed} permitidas. {overWeeks} semana(s) de exceso × {perWeek}/sem (retraso injustificado, Art 7 / tope {cap}).',
+    'flag.pop.overdueTitle': 'Comprobante de compra vencido — {label}',
+    'flag.pop.overdueDetail': 'El recibo pagado del proveedor venció el {deadline} (10 días hábiles tras el desembolso, Art 2.5). No está en archivo.',
+    'flag.pop.pendingTitle': 'Comprobante de compra pendiente — {label}',
+    'flag.pop.pendingDetail': 'Aún no se recibe el recibo pagado del proveedor{due}.',
+    'flag.pop.due': ' (vence {deadline})',
+    'flag.pod.title': 'Comprobante de entrega pendiente — {label}',
+    'flag.pod.detail': 'Sin confirmación de que los materiales llegaron al lote. Requerido antes de pagar el siguiente hito (Art 2.5).',
+    'flag.director.title': '{m} — Falta registrar la aprobación del Director de Obra',
+    'flag.director.detail': 'Cada desembolso de hito requiere la aprobación del inspector independiente (Art 2.1).',
+    'flag.paz.title': '{m} — Paz y Salvo no está en archivo',
+    'flag.paz.detail': 'Certificado de paz y salvo laboral requerido antes del desembolso desde H2 en adelante (Art 2.2).',
+    'flag.permit.title': 'Puerta {m} — "{permit}" no aprobado',
+    'flag.permit.detail': 'Estado: {status}. Requerido antes de {m}.',
+    'flag.warranty.title': 'Plazos de garantía corriendo desde la entrega final {fd}',
+    'flag.warranty.detail': 'Garantía de mano de obra/materiales de 2 años vence {y2} (Art 8.1); garantía estructural decenal de 10 años vence {y10} (Art 8.2).',
+    'flag.slip.title': '{m} en progreso y ya pasó su fecha planificada ({planned})',
+    'flag.slip.detail': '{days} día(s) sobre lo planificado y aún sin completar — actualice la fecha planificada o marque el hito como retrasado.',
+    'flag.drift.completeNoPay.title': '{m} marcado como completo pero sin desembolso registrado',
+    'flag.drift.completeNoPay.detail': 'No hay pago de desembolso vinculado a {m}. Registre el pago o revise el estado.',
+    'flag.drift.payNotComplete.title': '{m} tiene un desembolso pero no está marcado como completo',
+    'flag.drift.payNotComplete.detail': '{amount} desembolsado a {m} mientras su estado es "{status}".',
+
+    'milestones.heading': 'Hitos (H1–H8)',
+    'milestones.sub': 'Cronograma y desglose del contrato firmado (Art 2.1). El monto a pagar descuenta los anticipos de materiales del total del hito.',
+    'milestones.approvalGate': 'Puerta de aprobación:', 'milestones.notesLabel': 'Notas:',
+    'milestones.notesPlaceholder': 'Nombre del Director de Obra / fecha, referencias de inspección…',
+    'milestones.payments': 'Pagos:', 'milestones.noPayments': 'Sin pagos vinculados.',
+
+    'budget.contract': 'Contrato',
+    'budget.meta.h1': 'Fecha de desembolso H1',
+    'budget.meta.h1hint': 'Inicia el plazo de 21 semanas y el cálculo de penalización (Art 7.1).',
+    'budget.meta.final': 'Fecha de entrega final',
+    'budget.meta.finalhint': 'Inicia ambos plazos de garantía (Art 8).',
+    'budget.meta.weeks': 'Semanas permitidas', 'budget.meta.perWeek': 'Penalización por semana',
+    'budget.meta.cap': 'Tope de penalización',
+    'budget.budget': 'Presupuesto', 'budget.tile.contracted': 'Contratado',
+    'budget.tile.advOutstanding': 'Anticipos pendientes vs hitos',
+    'budget.payments': 'Pagos', 'budget.addPayment': '+ Agregar pago',
+    'budget.popPodLegend': 'Compra = comprobante de compra (recibo pagado del proveedor, dentro de 10 días hábiles tras un anticipo de material). Entrega = comprobante de entrega al lote. Ambos condicionan el pago del siguiente hito (Art 2.5).',
+    'budget.form.amount': 'Monto (USD)', 'budget.form.type': 'Tipo',
+    'budget.type.disb': 'desembolso de hito', 'budget.type.adv': 'anticipo de material',
+    'budget.form.method': 'Método', 'budget.form.methodPh': 'transferencia / cheque…',
+    'budget.form.advCat': 'Categoría de anticipo', 'budget.form.advCatPh': '— (solo anticipos)',
+    'budget.form.popDeadline': 'Límite comprobante de compra', 'budget.form.savePayment': 'Guardar pago',
+    'budget.form.paymentHint': 'Para un anticipo de material, fije el límite del comprobante a 10 días hábiles tras la fecha de desembolso.',
+    'budget.toast.paymentReq': 'Fecha, monto y tipo son obligatorios.',
+
+    'row.advance': 'anticipo', 'row.disbursement': 'desembolso',
+    'pill.ok': 'ok', 'pill.check': 'revisar',
+    'adv.steel': 'acero', 'adv.huurre_panels': 'paneles huurre',
+    'adv.roof_structure': 'estructura de techo', 'adv.electrical_cable': 'cable eléctrico',
+
+    'invoices.heading': 'Facturas recibidas', 'invoices.add': '+ Agregar factura',
+    'invoices.linkHeading': 'Vínculos pago ↔ factura (muchos a muchos)',
+    'invoices.linkSub': 'La conciliación rara vez es 1:1 — un pago puede cubrir varias facturas y una factura puede pagarse en varios pagos.',
+    'invoices.form.dateReceived': 'Fecha recibida', 'invoices.form.saveInvoice': 'Guardar factura',
+    'invoices.link.payment': 'Pago', 'invoices.link.invoice': 'Factura',
+    'invoices.link.amountApplied': 'Monto aplicado', 'invoices.link.link': 'Vincular',
+    'invoices.toast.invoiceReq': 'Fecha, proveedor y monto son obligatorios.',
+    'invoices.toast.linkReq': 'Los tres campos son obligatorios.',
+
+    'permits.heading': 'Permisos y requisitos obligatorios',
+    'permits.sub': 'Solo seguimiento de estado + documentos. El seguro CAR aparece aquí por ser un requisito obligatorio antes de H1 (Art 5.3).',
+    'permits.responsiblePh': 'contratista / propietario',
+
+    'decisions.heading': 'Registro de decisiones / cambios', 'decisions.add': '+ Agregar entrada',
+    'decisions.sub': 'Cualquier cosa de correo / WhatsApp / papel que cambie alcance, precio o cronograma. Entrada manual para v1. "Confirmado" es el filtro de "no cuenta hasta que usted lo diga".',
+    'decisions.awaiting': 'Pendientes de confirmación ({n})', 'decisions.confirmed': 'Confirmadas',
+    'decisions.nothing': 'Nada aquí.',
+    'decisions.form.partyPh': 'quién', 'decisions.form.resolvesPh': 'Art / punto de alcance',
+    'decisions.form.summaryLabel': 'Resumen / texto citado', 'decisions.form.confirmedLabel': 'confirmado',
+    'decisions.form.saveEntry': 'Guardar entrada', 'decisions.toast.req': 'Fecha y resumen son obligatorios.',
+    'source.whatsapp': 'WhatsApp', 'source.email': 'correo', 'source.manual': 'manual', 'source.other': 'otro',
+
+    'changes.heading': 'Órdenes de cambio', 'changes.add': '+ Nueva orden',
+    'changes.sub': 'Modificaciones al contrato Bripo vigente, con firma de ambas partes. Sin recálculo automático de presupuesto/hitos en v1 — se registra plano.',
+    'changes.form.costImpact': 'Impacto en costo (USD)', 'changes.form.schedImpact': 'Impacto en cronograma (días)',
+    'changes.form.saveRequest': 'Guardar orden', 'changes.form.evidencePh': 'confirmación por correo…',
+    'changes.toast.req': 'La descripción es obligatoria.',
+
+    'future.heading': 'Trabajo futuro / independiente', 'future.add': '+ Agregar ítem',
+    'future.sub': 'Alcance que está considerando y que NO es una modificación al contrato Bripo firmado — podría ser su propio contrato, quizás con otro proveedor. No pasa por la firma de órdenes de cambio.',
+    'future.form.estCost': 'Costo estimado (USD)', 'future.form.timeSensitive': 'Nota de urgencia',
+    'future.form.saveItem': 'Guardar ítem', 'future.toast.req': 'La descripción es obligatoria.',
+
+    'vendors.heading': 'Proveedores y contactos', 'vendors.add': '+ Agregar proveedor',
+    'vendors.form.saveVendor': 'Guardar proveedor', 'vendors.toast.req': 'El nombre es obligatorio.',
+
+    'documents.heading': 'Documentos',
+    'documents.sub': 'Índice de metadatos de archivos guardados en el bucket privado "documents" de Supabase Storage (mismo RLS). Nunca guarde un enlace público. Sin números de cédula / RUC.',
+    'documents.form.file': 'Archivo', 'documents.form.linkedTo': 'Vinculado a',
+    'documents.form.entityId': 'ID de entidad', 'documents.form.entityIdPh': 'p. ej. H2',
+    'documents.form.upload': 'Subir', 'documents.toast.chooseFile': 'Seleccione un archivo.',
+
+    'st.not_started': 'no iniciado', 'st.in_progress': 'en progreso', 'st.pending_inspection': 'pendiente de inspección',
+    'st.complete': 'completo', 'st.delayed': 'retrasado',
+    'st.submitted': 'enviado', 'st.under_review': 'en revisión', 'st.approved': 'aprobado',
+    'st.unmatched': 'sin conciliar', 'st.partially_matched': 'parcialmente conciliado', 'st.matched': 'conciliado',
+    'st.proposed': 'propuesta', 'st.rejected': 'rechazada', 'st.superseded': 'reemplazada',
+    'st.idea': 'idea', 'st.quoted': 'cotizado', 'st.contracted': 'contratado', 'st.declined': 'descartado',
+    'st.pending': 'pendiente',
+    'ent.milestone': 'hito', 'ent.permit': 'permiso', 'ent.payment': 'pago',
+    'ent.invoice': 'factura', 'ent.vendor': 'proveedor', 'ent.change_request': 'orden de cambio',
+  },
+};
+function t(key, vars) {
+  let s = (I18N[LANG] && I18N[LANG][key] != null) ? I18N[LANG][key] : (I18N.en[key] != null ? I18N.en[key] : key);
+  if (vars) for (const [k, v] of Object.entries(vars)) s = s.split('{' + k + '}').join(v);
+  return s;
+}
+const stLabel = v => v == null ? '—' : t('st.' + v, {}) || String(v).replace(/_/g, ' ');
+const advLabel = v => v ? t('adv.' + v) : '—';
+
 const USD = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 const USD2 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
 const money  = n => n == null ? '—' : USD.format(Number(n));
@@ -182,17 +507,16 @@ const TODAY = new Date().toISOString().slice(0, 10);
 const daysBetween = (a, b) => Math.floor((new Date(b) - new Date(a)) / 86400000);
 
 function toast(text, isErr) {
-  const t = $('toast');
-  t.textContent = text;
-  t.className = 'toast show' + (isErr ? ' err' : '');
+  const el = $('toast');
+  el.textContent = text;
+  el.className = 'toast show' + (isErr ? ' err' : '');
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => (t.className = 'toast'), 2600);
+  toast._t = setTimeout(() => (el.className = 'toast'), 2600);
 }
 
 /* ---------------- state ---------------- */
 const S = {
-  isOwner: false,
-  tab: 'overview',
+  isOwner: false, member: false, session: null, tab: 'overview',
   meta: null, milestones: [], payments: [], invoices: [], links: [],
   permits: [], decisions: [], changes: [], future: [], vendors: [], documents: [],
 };
@@ -205,9 +529,7 @@ const TABLES = {
 };
 
 async function loadAll() {
-  const results = await Promise.all(
-    Object.keys(TABLES).map(t => db.from(t).select('*'))
-  );
+  const results = await Promise.all(Object.keys(TABLES).map(t => db.from(t).select('*')));
   Object.keys(TABLES).forEach((t, i) => {
     const { data, error } = results[i];
     if (error) { console.warn(t, error.message); return; }
@@ -224,7 +546,7 @@ async function loadAll() {
 /* ---------------- writes ---------------- */
 async function logActivity(entity, entity_id, action, detail) {
   try { await db.from('activity_log').insert({ entity, entity_id: String(entity_id ?? ''), action, detail }); }
-  catch (e) { /* audit is best-effort */ }
+  catch (e) {}
 }
 async function write(kind, table, arg, values, entityId) {
   let q;
@@ -234,14 +556,14 @@ async function write(kind, table, arg, values, entityId) {
   const { data, error } = await q;
   if (error) { toast(error.message, true); return null; }
   await logActivity(table, entityId ?? (data && data[0] && (data[0].id ?? '')) ?? '', kind, values || arg);
-  toast('Saved.');
+  toast(t('common.saved'));
   await loadAll();
   render();
   return data;
 }
 const upd = (table, match, values, id) => write('update', table, match, values, id);
 const ins = (table, values) => write('insert', table, null, values, null);
-const del = (table, match, id) => { if (confirm('Delete this row?')) return write('delete', table, match, null, id); };
+const del = (table, match, id) => { if (confirm(t('common.confirmDelete'))) return write('delete', table, match, null, id); };
 
 /* ---------------- deterministic math ---------------- */
 const contractPrice = () => Number(S.meta?.contract_price ?? 73500);
@@ -271,19 +593,13 @@ function scheduleStatus() {
   const deadline = new Date(h1); deadline.setDate(deadline.getDate() + weeksAllowed * 7);
   return {
     started: true, h1, weeksElapsed, weeksAllowed, overWeeks, penalty, cap, perWeek,
-    atCap: penalty >= cap && cap > 0,
-    deadline: deadline.toISOString().slice(0, 10),
+    atCap: penalty >= cap && cap > 0, deadline: deadline.toISOString().slice(0, 10),
   };
 }
 
 const nextMilestone = () => S.milestones.find(m => m.status !== 'complete') || null;
 
-// permits (by seq) that gate a given milestone — from the contract approval gates
-const MILESTONE_PERMIT_GATES = {
-  H1: [9],            // CAR insurance policy
-  H2: [2, 3, 4],      // movimiento de tierra, planos plomería, permiso de construcción
-  H6: [10],           // HOA / Altos del María N-2 deferral
-};
+const MILESTONE_PERMIT_GATES = { H1: [9], H2: [2, 3, 4], H6: [10] };
 
 function attentionFlags() {
   const flags = [];
@@ -292,52 +608,64 @@ function attentionFlags() {
   if (sc.started && sc.penalty > 0) {
     flags.push({
       level: sc.atCap ? 'red' : 'amber', big: true,
-      t: sc.atCap
-        ? `Delay penalty at the ${money(sc.cap)} cap — contract termination trigger (Art 4.1e)`
-        : `Potential delay penalty: ${money(sc.penalty)}`,
-      d: `${sc.weeksElapsed} weeks elapsed since H1 disbursement (${sc.h1}); ${sc.weeksAllowed} allowed. `
-        + `${sc.overWeeks} week(s) over × ${money(sc.perWeek)}/wk (unjustified delay, Art 7 / cap ${money(sc.cap)}).`,
+      t: sc.atCap ? t('flag.delay.capTitle', { cap: money(sc.cap) })
+                  : t('flag.delay.title', { penalty: money(sc.penalty) }),
+      d: t('flag.delay.detail', {
+        weeksElapsed: sc.weeksElapsed, h1: sc.h1, weeksAllowed: sc.weeksAllowed,
+        overWeeks: sc.overWeeks, perWeek: money(sc.perWeek), cap: money(sc.cap),
+      }),
     });
   }
 
-  // material-advance compliance (Art 2.5)
   for (const p of S.payments.filter(p => p.payment_type === 'material_advance')) {
-    const label = `${money(p.amount)} advance ${p.advance_category ? '(' + p.advance_category + ')' : ''} ${p.date}`;
+    const label = `${money(p.amount)} ${t('row.advance')}${p.advance_category ? ' (' + advLabel(p.advance_category) + ')' : ''} ${p.date}`;
     if (p.proof_of_purchase_deadline && p.proof_of_purchase_deadline < TODAY && !p.proof_of_purchase_received)
-      flags.push({ level: 'red', t: `Proof-of-purchase overdue — ${label}`,
-        d: `Paid vendor receipt was due ${p.proof_of_purchase_deadline} (10 business days after disbursement, Art 2.5). Not on file.` });
+      flags.push({ level: 'red', t: t('flag.pop.overdueTitle', { label }),
+        d: t('flag.pop.overdueDetail', { deadline: p.proof_of_purchase_deadline }) });
     else if (!p.proof_of_purchase_received)
-      flags.push({ level: 'amber', t: `Proof-of-purchase pending — ${label}`,
-        d: `Paid vendor receipt not yet received${p.proof_of_purchase_deadline ? ` (due ${p.proof_of_purchase_deadline})` : ''}.` });
+      flags.push({ level: 'amber', t: t('flag.pop.pendingTitle', { label }),
+        d: t('flag.pop.pendingDetail', { due: p.proof_of_purchase_deadline ? t('flag.pop.due', { deadline: p.proof_of_purchase_deadline }) : '' }) });
     if (!p.proof_of_delivery_received)
-      flags.push({ level: 'amber', t: `Proof-of-delivery pending — ${label}`,
-        d: `No confirmation materials arrived at the lot. Required before the next milestone pays out (Art 2.5).` });
+      flags.push({ level: 'amber', t: t('flag.pod.title', { label }), d: t('flag.pod.detail') });
   }
 
-  // next-milestone approval gate
   const nm = nextMilestone();
   if (nm) {
     if (!nm.director_de_obra_approved)
-      flags.push({ level: 'amber', t: `${nm.id} — Director de Obra sign-off not recorded`,
-        d: `Every milestone disbursement needs the independent inspector's approval (Art 2.1).` });
+      flags.push({ level: 'amber', t: t('flag.director.title', { m: nm.id }), d: t('flag.director.detail') });
     if (nm.seq >= 2 && !nm.paz_y_salvo_on_file)
-      flags.push({ level: 'amber', t: `${nm.id} — Paz y Salvo not on file`,
-        d: `Worker-payment clearance required before disbursement from H2 onward (Art 2.2).` });
+      flags.push({ level: 'amber', t: t('flag.paz.title', { m: nm.id }), d: t('flag.paz.detail') });
     for (const pseq of (MILESTONE_PERMIT_GATES[nm.id] || [])) {
       const pm = S.permits.find(p => p.seq === pseq);
       if (pm && pm.status !== 'approved')
-        flags.push({ level: 'amber', t: `${nm.id} gate — "${pm.type}" not approved`,
-          d: `Status: ${pm.status.replace(/_/g, ' ')}. Required before ${nm.id}.` });
+        flags.push({ level: 'amber', t: t('flag.permit.title', { m: nm.id, permit: pm.type }),
+          d: t('flag.permit.detail', { status: stLabel(pm.status), m: nm.id }) });
     }
   }
 
-  // warranty clocks
+  // 5 — milestone slipping: in progress / pending inspection past its planned date
+  for (const m of S.milestones) {
+    if (['in_progress', 'pending_inspection'].includes(m.status) && m.planned_date && m.planned_date < TODAY)
+      flags.push({ level: 'amber', t: t('flag.slip.title', { m: m.id, planned: m.planned_date }),
+        d: t('flag.slip.detail', { days: daysBetween(m.planned_date, TODAY) }) });
+  }
+
+  // 6 — bookkeeping drift between milestone status and recorded disbursements
+  for (const m of S.milestones) {
+    const disb = disbursedFor(m.id);
+    if (m.status === 'complete' && disb === 0)
+      flags.push({ level: 'amber', t: t('flag.drift.completeNoPay.title', { m: m.id }),
+        d: t('flag.drift.completeNoPay.detail', { m: m.id }) });
+    if (m.status !== 'complete' && disb > 0)
+      flags.push({ level: 'amber', t: t('flag.drift.payNotComplete.title', { m: m.id }),
+        d: t('flag.drift.payNotComplete.detail', { amount: money(disb), m: m.id, status: stLabel(m.status) }) });
+  }
+
   if (S.meta?.final_delivery_date) {
     const fd = S.meta.final_delivery_date;
     const y = n => { const d = new Date(fd); d.setFullYear(d.getFullYear() + n); return d.toISOString().slice(0, 10); };
-    flags.push({ level: 'amber', t: `Warranty clocks running from final delivery ${fd}`,
-      d: `Labour/materials 2-yr expires ${y(S.meta.warranty_labor_years)} (Art 8.1); `
-        + `structural decennial 10-yr expires ${y(S.meta.warranty_structural_years)} (Art 8.2).` });
+    flags.push({ level: 'amber', t: t('flag.warranty.title', { fd }),
+      d: t('flag.warranty.detail', { y2: y(S.meta.warranty_labor_years), y10: y(S.meta.warranty_structural_years) }) });
   }
 
   return flags;
@@ -345,26 +673,23 @@ function attentionFlags() {
 
 /* ---------------- shared render bits ---------------- */
 const STATUS_PILL = {
-  not_started: 'dim', in_progress: 'amber', pending_inspection: 'amber',
-  complete: 'green', delayed: 'red',
+  not_started: 'dim', in_progress: 'amber', pending_inspection: 'amber', complete: 'green', delayed: 'red',
   submitted: 'amber', under_review: 'amber', approved: 'green',
   unmatched: 'dim', partially_matched: 'amber', matched: 'green',
   proposed: 'dim', rejected: 'red', superseded: 'dim',
-  idea: 'dim', quoted: 'amber', contracted: 'green', declined: 'dim',
-  pending: 'dim',
+  idea: 'dim', quoted: 'amber', contracted: 'green', declined: 'dim', pending: 'dim',
 };
-const pill = v => h('span', { class: 'pill ' + (STATUS_PILL[v] || 'dim'), text: (v || '').replace(/_/g, ' ') });
+const pill = v => h('span', { class: 'pill ' + (STATUS_PILL[v] || 'dim'), text: stLabel(v) });
 
 function selectCell(value, options, onchange) {
   if (!S.isOwner) return pill(value);
   const sel = h('select', { onchange: e => onchange(e.target.value) });
-  for (const o of options) sel.append(h('option', { value: o, ...(o === value ? { selected: true } : {}) }, o.replace(/_/g, ' ')));
+  for (const o of options) sel.append(h('option', { value: o, ...(o === value ? { selected: true } : {}) }, stLabel(o)));
   return sel;
 }
 function checkCell(value, onchange) {
-  const cb = h('input', { type: 'checkbox', ...(value ? { checked: true } : {}), disabled: !S.isOwner ? true : false,
+  return h('input', { type: 'checkbox', ...(value ? { checked: true } : {}), disabled: !S.isOwner,
     onchange: e => onchange(e.target.checked) });
-  return cb;
 }
 function dateCell(value, onchange) {
   if (!S.isOwner) return document.createTextNode(dateStr(value));
@@ -374,27 +699,33 @@ function textCellEdit(value, onchange, ph) {
   if (!S.isOwner) return document.createTextNode(value || '—');
   return h('input', { type: 'text', value: value || '', placeholder: ph || '', onchange: e => onchange(e.target.value || null) });
 }
-function ownerOnly(node) { return S.isOwner ? node : null; }
+const ownerOnly = node => S.isOwner ? node : null;
+const field = (label, node) => h('div', {}, [h('label', {}, label), node]);
+function tableFrom(headers, rows) {
+  return h('div', { class: 'tbl-scroll' }, h('table', {}, [
+    h('thead', {}, h('tr', {}, headers.map(x => h('th', {}, x)))),
+    h('tbody', {}, rows.map(r => h('tr', {}, r.map(c => h('td', {}, c == null ? '—' : c))))),
+  ]));
+}
+const tile = (k, val) => h('div', { class: 'tile' }, [h('div', { class: 'k', text: k }), h('div', { class: 'v', text: val })]);
 
 /* ---------------- tabs ---------------- */
 const TABS = [
-  ['overview', 'Overview'], ['milestones', 'Milestones'], ['budget', 'Budget & payments'],
-  ['invoices', 'Invoices'], ['permits', 'Permits'], ['decisions', 'Decision log'],
-  ['changes', 'Change requests'], ['future', 'Future work'], ['vendors', 'Vendors'],
-  ['documents', 'Documents'],
+  'overview', 'milestones', 'budget', 'invoices', 'permits',
+  'decisions', 'changes', 'future', 'vendors', 'documents',
 ];
 
 function render() {
   const nav = $('nav'); nav.innerHTML = '';
-  for (const [id, label] of TABS)
-    nav.append(h('button', { class: id === S.tab ? 'active' : '', onclick: () => { S.tab = id; render(); } }, label));
+  for (const id of TABS)
+    nav.append(h('button', { class: id === S.tab ? 'active' : '', onclick: () => { S.tab = id; render(); } }, t('nav.' + id)));
   const v = $('view'); v.innerHTML = '';
   ({
     overview: viewOverview, milestones: viewMilestones, budget: viewBudget,
     invoices: viewInvoices, permits: viewPermits, decisions: viewDecisions,
     changes: viewChanges, future: viewFuture, vendors: viewVendors, documents: viewDocuments,
   })[S.tab](v);
-  if (!S.isOwner) v.prepend(h('div', { class: 'ro-note', text: 'Read-only — this account is not the owner.' }));
+  if (!S.isOwner) v.prepend(h('div', { class: 'ro-note', text: t('readonly') }));
 }
 
 /* ---------------- Overview ---------------- */
@@ -404,66 +735,54 @@ function viewOverview(v) {
   const sc = scheduleStatus();
 
   v.append(h('div', { class: 'tiles' }, [
-    tile('Contract value', money(contractPrice())),
-    tile('% complete', pct.toFixed(1) + '%'),
-    tile('Paid to date', money(paid)),
-    tile('Remaining', money(contractPrice() - paid)),
+    tile(t('overview.tile.contract'), money(contractPrice())),
+    tile(t('overview.tile.pct'), pct.toFixed(1) + '%'),
+    tile(t('overview.tile.paid'), money(paid)),
+    tile(t('overview.tile.remaining'), money(contractPrice() - paid)),
   ]));
-  const bar = h('div', { class: 'bar' }, h('i', { style: `width:${Math.min(100, pct).toFixed(1)}%` }));
-  v.append(bar);
-  v.append(h('div', { class: 'sub', text:
-    `${S.milestones.filter(m => m.status === 'complete').length} of ${S.milestones.length} milestones complete.` }));
+  v.append(h('div', { class: 'bar' }, h('i', { style: `width:${Math.min(100, pct).toFixed(1)}%` })));
+  v.append(h('div', { class: 'sub', text: t('overview.milestonesComplete', {
+    done: S.milestones.filter(m => m.status === 'complete').length, total: S.milestones.length,
+  }) }));
 
-  // schedule
-  v.append(h('h2', {}, 'Schedule'));
+  v.append(h('h2', {}, t('overview.schedule')));
   if (!sc.started) {
     v.append(h('div', { class: 'flag amber' }, [h('span', { class: 'dot' }),
-      h('div', {}, [h('div', { class: 't', text: '21-week contract clock has not started' }),
-        h('div', { class: 'd', text: 'Set the H1 disbursement date in Budget & payments once H1 is paid — that starts the clock and the delay-penalty math (Art 7.1).' })])]));
+      h('div', {}, [h('div', { class: 't', text: t('overview.clockNotStarted') }),
+        h('div', { class: 'd', text: t('overview.clockNotStartedDetail') })])]));
   } else {
     v.append(h('div', { class: 'row' }, [
-      tile('H1 disbursement', sc.h1),
-      tile('Weeks elapsed', `${sc.weeksElapsed} / ${sc.weeksAllowed}`),
-      tile('Contract deadline', sc.deadline),
-      tile('Delay penalty', money(sc.penalty)),
+      tile(t('overview.tile.h1'), sc.h1),
+      tile(t('overview.tile.weeks'), `${sc.weeksElapsed} / ${sc.weeksAllowed}`),
+      tile(t('overview.tile.deadline'), sc.deadline),
+      tile(t('overview.tile.penalty'), money(sc.penalty)),
     ]));
   }
 
-  // attention
-  v.append(h('h2', {}, 'Attention'));
+  v.append(h('h2', {}, t('overview.attention')));
   const flags = attentionFlags();
-  if (!flags.length) v.append(h('div', { class: 'placeholder', text: 'Nothing flagged. Schedule, advances and the next milestone gate all look clear.' }));
+  if (!flags.length) v.append(h('div', { class: 'placeholder', text: t('overview.nothingFlagged') }));
   for (const f of flags)
     v.append(h('div', { class: 'flag ' + f.level + (f.big ? ' big' : '') }, [
       h('span', { class: 'dot' }),
       h('div', {}, [h('div', { class: 't', text: f.t }), h('div', { class: 'd', text: f.d })]),
     ]));
 
-  // recent decisions
-  v.append(h('h2', {}, 'Recent decisions'));
+  v.append(h('h2', {}, t('overview.recentDecisions')));
   const recent = S.decisions.filter(d => d.confirmed).slice(0, 5);
-  if (!recent.length) v.append(h('div', { class: 'placeholder', text: 'No confirmed decisions logged yet.' }));
-  else v.append(tableFrom(['Date', 'Party', 'Summary', 'Resolves'],
+  if (!recent.length) v.append(h('div', { class: 'placeholder', text: t('overview.noConfirmedDecisions') }));
+  else v.append(tableFrom([t('col.date'), t('col.party'), t('col.summary'), t('col.resolves')],
     recent.map(d => [d.date, d.party || '—', d.summary, d.resolves || '—'])));
-}
-const tile = (k, val) => h('div', { class: 'tile' }, [h('div', { class: 'k', text: k }), h('div', { class: 'v', text: val })]);
-
-function tableFrom(headers, rows) {
-  const t = h('table', {}, [
-    h('thead', {}, h('tr', {}, headers.map(x => h('th', {}, x)))),
-    h('tbody', {}, rows.map(r => h('tr', {}, r.map(c => h('td', {}, c == null ? '—' : c))))),
-  ]);
-  return h('div', { class: 'tbl-scroll' }, t);
 }
 
 /* ---------------- Milestones ---------------- */
 function viewMilestones(v) {
-  v.append(h('h2', {}, 'Milestones (H1–H8)'));
-  v.append(h('div', { class: 'sub', text: 'Schedule and split from the signed contract (Art 2.1). Amount due nets material advances against the milestone total.' }));
+  v.append(h('h2', {}, t('milestones.heading')));
+  v.append(h('div', { class: 'sub', text: t('milestones.sub') }));
 
   const body = h('tbody');
   for (const m of S.milestones) {
-    const tr = h('tr', {}, [
+    body.append(h('tr', {}, [
       h('td', {}, m.id),
       h('td', {}, m.name),
       h('td', { class: 'num' }, Number(m.pct_of_contract) + '%'),
@@ -475,62 +794,61 @@ function viewMilestones(v) {
       h('td', {}, dateCell(m.actual_date, val => upd('milestones', { id: m.id }, { actual_date: val }, m.id))),
       h('td', {}, checkCell(m.paz_y_salvo_on_file, val => upd('milestones', { id: m.id }, { paz_y_salvo_on_file: val }, m.id))),
       h('td', {}, checkCell(m.director_de_obra_approved, val => upd('milestones', { id: m.id }, { director_de_obra_approved: val }, m.id))),
-    ]);
-    body.append(tr);
-    const detail = h('tr', { class: 'sub-row' }, h('td', { colspan: 10 }, [
-      h('div', {}, [h('strong', {}, 'Approval gate: '), m.approval_gate_notes || '—']),
+    ]));
+    body.append(h('tr', { class: 'sub-row' }, h('td', { colspan: 10 }, [
+      h('div', {}, [h('strong', {}, t('milestones.approvalGate') + ' '), m.approval_gate_notes || '—']),
       h('div', { style: 'margin-top:6px' }, [
-        h('strong', {}, 'Notes: '),
+        h('strong', {}, t('milestones.notesLabel') + ' '),
         S.isOwner
-          ? h('input', { type: 'text', value: m.notes || '', placeholder: 'Director de Obra name / date, inspection refs…',
+          ? h('input', { type: 'text', value: m.notes || '', placeholder: t('milestones.notesPlaceholder'),
               onchange: e => upd('milestones', { id: m.id }, { notes: e.target.value || null }, m.id) })
           : (m.notes || '—'),
       ]),
       linkedPaymentsMini(m.id),
-    ]));
-    body.append(detail);
+    ])));
   }
   v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
-    h('thead', {}, h('tr', {}, ['#', 'Milestone', '%', 'Contract', 'Due (net adv.)', 'Status', 'Planned', 'Actual', 'Paz y Salvo', 'Dir. de Obra'].map(x => h('th', { class: /%|Contract|Due/.test(x) ? 'num' : '' }, x)))),
+    h('thead', {}, h('tr', {}, [
+      [t('col.num'), 0], [t('col.milestone'), 0], ['%', 1], [t('col.contract'), 1], [t('col.dueNet'), 1],
+      [t('col.status'), 0], [t('col.planned'), 0], [t('col.actual'), 0], [t('col.pazYSalvo'), 0], [t('col.dirDeObra'), 0],
+    ].map(([x, n]) => h('th', { class: n ? 'num' : '' }, x)))),
     body,
   ])));
 }
 function linkedPaymentsMini(mid) {
   const ps = S.payments.filter(p => p.milestone_id === mid);
-  if (!ps.length) return h('div', { class: 'muted-cell', style: 'margin-top:6px', text: 'No payments linked.' });
+  if (!ps.length) return h('div', { class: 'muted-cell', style: 'margin-top:6px', text: t('milestones.noPayments') });
   return h('div', { style: 'margin-top:6px' }, [
-    h('strong', {}, 'Payments: '),
-    ps.map(p => `${p.date} ${money(p.amount)} (${p.payment_type === 'material_advance' ? 'advance' : 'disbursement'})`).join('  ·  '),
+    h('strong', {}, t('milestones.payments') + ' '),
+    ps.map(p => `${p.date} ${money(p.amount)} (${p.payment_type === 'material_advance' ? t('row.advance') : t('row.disbursement')})`).join('  ·  '),
   ]);
 }
 
 /* ---------------- Budget & payments ---------------- */
 function viewBudget(v) {
-  // contract meta editor
-  v.append(h('h2', {}, 'Contract'));
+  v.append(h('h2', {}, t('budget.contract')));
   const m = S.meta || {};
-  const metaGrid = h('div', { class: 'inline-form' }, [
-    metaField('H1 disbursement date', 'h1_disbursement_date', 'date', m.h1_disbursement_date,
-      'Starts the 21-week clock and the penalty math (Art 7.1).'),
-    metaField('Final delivery date', 'final_delivery_date', 'date', m.final_delivery_date,
-      'Starts both warranty clocks (Art 8).'),
-    metaField('Weeks allowed', 'weeks_allowed', 'number', m.weeks_allowed),
-    metaField('Delay penalty / week', 'delay_penalty_per_week', 'number', m.delay_penalty_per_week),
-    metaField('Delay penalty cap', 'delay_penalty_cap', 'number', m.delay_penalty_cap),
-  ]);
-  v.append(metaGrid);
+  v.append(h('div', { class: 'inline-form' }, [
+    metaField(t('budget.meta.h1'), 'h1_disbursement_date', 'date', m.h1_disbursement_date, t('budget.meta.h1hint')),
+    metaField(t('budget.meta.final'), 'final_delivery_date', 'date', m.final_delivery_date, t('budget.meta.finalhint')),
+    metaField(t('budget.meta.weeks'), 'weeks_allowed', 'number', m.weeks_allowed),
+    metaField(t('budget.meta.perWeek'), 'delay_penalty_per_week', 'number', m.delay_penalty_per_week),
+    metaField(t('budget.meta.cap'), 'delay_penalty_cap', 'number', m.delay_penalty_cap),
+  ]));
 
-  // budget rollup
-  v.append(h('h2', {}, 'Budget'));
+  v.append(h('h2', {}, t('budget.budget')));
   const paid = paidToDate();
   v.append(h('div', { class: 'tiles' }, [
-    tile('Contracted', money(contractPrice())),
-    tile('Paid to date', money(paid)),
-    tile('Remaining', money(contractPrice() - paid)),
-    tile('Advances outstanding vs milestones', money(S.milestones.reduce((s, mm) => s + advancesFor(mm.id), 0))),
+    tile(t('budget.tile.contracted'), money(contractPrice())),
+    tile(t('overview.tile.paid'), money(paid)),
+    tile(t('overview.tile.remaining'), money(contractPrice() - paid)),
+    tile(t('budget.tile.advOutstanding'), money(S.milestones.reduce((s, mm) => s + advancesFor(mm.id), 0))),
   ]));
   v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
-    h('thead', {}, h('tr', {}, ['#', 'Milestone', 'Contract', 'Advances', 'Disbursed', 'Due at completion'].map(x => h('th', { class: x === '#' || x === 'Milestone' ? '' : 'num' }, x)))),
+    h('thead', {}, h('tr', {}, [
+      [t('col.num'), 0], [t('col.milestone'), 0], [t('col.contract'), 1], [t('col.advances'), 1],
+      [t('col.disbursed'), 1], [t('col.dueAtCompletion'), 1],
+    ].map(([x, n]) => h('th', { class: n ? 'num' : '' }, x)))),
     h('tbody', {}, S.milestones.map(mm => h('tr', {}, [
       h('td', {}, mm.id), h('td', {}, mm.name),
       h('td', { class: 'num' }, money(mm.contract_amount)),
@@ -540,18 +858,22 @@ function viewBudget(v) {
     ]))),
   ])));
 
-  // payments
-  v.append(h('div', { class: 'spread' }, [h('h2', {}, 'Payments'), ownerOnly(h('button', { class: 'sm', onclick: () => togglePaymentForm(v) }, '+ Add payment'))]));
+  v.append(h('div', { class: 'spread' }, [h('h2', {}, t('budget.payments')),
+    ownerOnly(h('button', { class: 'sm', onclick: () => togglePaymentForm() }, t('budget.addPayment')))]));
   v.append(h('div', { id: 'paymentForm' }));
   v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
-    h('thead', {}, h('tr', {}, ['Date', 'Amount', 'Type', 'Milestone', 'Recipient', 'Category', 'PoP', 'PoP deadline', 'PoD', ''].map(x => h('th', { class: x === 'Amount' ? 'num' : '' }, x)))),
+    h('thead', {}, h('tr', {}, [
+      [t('col.date'), 0], [t('col.amount'), 1], [t('col.status'), 0], [t('col.milestone'), 0], [t('col.recipient'), 0],
+      [t('col.category'), 0], [t('col.pop'), 0], [t('col.popDeadline'), 0], [t('col.pod'), 0], ['', 0],
+    ].map(([x, n]) => h('th', { class: n ? 'num' : '' }, x)))),
     h('tbody', {}, S.payments.map(p => paymentRow(p))),
   ])));
-  v.append(h('div', { class: 'sub', text: 'PoP = proof of purchase (paid vendor receipt, due 10 business days after a material advance). PoD = proof of delivery to the lot. Both gate the next milestone payout (Art 2.5).' }));
+  v.append(h('div', { class: 'sub', text: t('budget.popPodLegend') }));
 }
 function metaField(label, key, type, value, hint) {
   const inp = h('input', { type, value: value ?? '', disabled: !S.isOwner,
-    onchange: e => upd('contract_meta', { id: 'current' }, { [key]: (type === 'number' ? Number(e.target.value) : (e.target.value || null)), updated_at: new Date().toISOString() }, 'current') });
+    onchange: e => upd('contract_meta', { id: 'current' },
+      { [key]: (type === 'number' ? Number(e.target.value) : (e.target.value || null)), updated_at: new Date().toISOString() }, 'current') });
   return h('div', {}, [h('label', {}, label), inp, hint ? h('div', { class: 'sub', style: 'font-size:11px;margin-top:3px', text: hint }) : null]);
 }
 function paymentRow(p) {
@@ -562,73 +884,72 @@ function paymentRow(p) {
   return h('tr', {}, [
     h('td', {}, p.date),
     h('td', { class: 'num' }, money2(p.amount)),
-    h('td', {}, p.payment_type === 'material_advance' ? 'advance' : 'disbursement'),
+    h('td', {}, p.payment_type === 'material_advance' ? t('row.advance') : t('row.disbursement')),
     h('td', {}, p.milestone_id || '—'),
     h('td', {}, p.recipient || '—'),
-    h('td', {}, p.advance_category || '—'),
+    h('td', {}, advLabel(p.advance_category)),
     h('td', {}, p.payment_type === 'material_advance'
-      ? checkCell(p.proof_of_purchase_received, val => upd('payments', { id: p.id }, { proof_of_purchase_received: val }, p.id))
-      : '—'),
+      ? checkCell(p.proof_of_purchase_received, val => upd('payments', { id: p.id }, { proof_of_purchase_received: val }, p.id)) : '—'),
     h('td', {}, p.payment_type === 'material_advance'
-      ? dateCell(p.proof_of_purchase_deadline, val => upd('payments', { id: p.id }, { proof_of_purchase_deadline: val }, p.id))
-      : '—'),
+      ? dateCell(p.proof_of_purchase_deadline, val => upd('payments', { id: p.id }, { proof_of_purchase_deadline: val }, p.id)) : '—'),
     h('td', {}, p.payment_type === 'material_advance'
-      ? checkCell(p.proof_of_delivery_received, val => upd('payments', { id: p.id }, { proof_of_delivery_received: val }, p.id))
-      : '—'),
+      ? checkCell(p.proof_of_delivery_received, val => upd('payments', { id: p.id }, { proof_of_delivery_received: val }, p.id)) : '—'),
     h('td', {}, [
-      compliance ? h('span', { class: 'pill ' + compliance, text: compliance === 'green' ? 'ok' : 'check' }) : null,
+      compliance ? h('span', { class: 'pill ' + compliance, text: compliance === 'green' ? t('pill.ok') : t('pill.check') }) : null,
       ownerOnly(h('button', { class: 'ghost sm', style: 'margin-left:6px', onclick: () => del('payments', { id: p.id }, p.id) }, '×')),
     ]),
   ]);
 }
-function togglePaymentForm(v) {
+function togglePaymentForm() {
   const host = $('paymentForm');
   if (host.children.length) { host.innerHTML = ''; return; }
   const f = {};
-  const bizDeadline = d => { // +10 business days
+  const bizDeadline = d => {
     const x = new Date(d); let n = 10;
     while (n > 0) { x.setDate(x.getDate() + 1); if (x.getDay() !== 0 && x.getDay() !== 6) n--; }
     return x.toISOString().slice(0, 10);
   };
-  const form = h('div', { class: 'inline-form' }, [
-    field('Date', h('input', { type: 'date', value: TODAY, onchange: e => f.date = e.target.value })),
-    field('Amount (USD)', h('input', { type: 'number', step: '0.01', onchange: e => f.amount = Number(e.target.value) })),
-    field('Type', h('select', { onchange: e => { f.payment_type = e.target.value; render(); } }, [
-      h('option', { value: 'milestone_disbursement' }, 'milestone disbursement'),
-      h('option', { value: 'material_advance' }, 'material advance'),
+  f.proof_of_purchase_deadline = bizDeadline(TODAY);
+  host.append(h('div', { class: 'inline-form' }, [
+    field(t('col.date'), h('input', { type: 'date', value: TODAY, onchange: e => f.date = e.target.value })),
+    field(t('budget.form.amount'), h('input', { type: 'number', step: '0.01', onchange: e => f.amount = Number(e.target.value) })),
+    field(t('budget.form.type'), h('select', { onchange: e => f.payment_type = e.target.value }, [
+      h('option', { value: 'milestone_disbursement' }, t('budget.type.disb')),
+      h('option', { value: 'material_advance' }, t('budget.type.adv')),
     ])),
-    field('Milestone', h('select', { onchange: e => f.milestone_id = e.target.value || null }, [
+    field(t('col.milestone'), h('select', { onchange: e => f.milestone_id = e.target.value || null }, [
       h('option', { value: '' }, '—'), ...S.milestones.map(m => h('option', { value: m.id }, `${m.id} ${m.name}`)),
     ])),
-    field('Recipient', h('input', { type: 'text', onchange: e => f.recipient = e.target.value || null })),
-    field('Method', h('input', { type: 'text', placeholder: 'wire / cheque…', onchange: e => f.method = e.target.value || null })),
-    field('Advance category', h('select', { onchange: e => f.advance_category = e.target.value || null }, [
-      h('option', { value: '' }, '— (advances only)'),
-      ...['steel', 'huurre_panels', 'roof_structure', 'electrical_cable'].map(c => h('option', { value: c }, c)),
+    field(t('col.recipient'), h('input', { type: 'text', onchange: e => f.recipient = e.target.value || null })),
+    field(t('budget.form.method'), h('input', { type: 'text', placeholder: t('budget.form.methodPh'), onchange: e => f.method = e.target.value || null })),
+    field(t('budget.form.advCat'), h('select', { onchange: e => f.advance_category = e.target.value || null }, [
+      h('option', { value: '' }, t('budget.form.advCatPh')),
+      ...['steel', 'huurre_panels', 'roof_structure', 'electrical_cable'].map(c => h('option', { value: c }, advLabel(c))),
     ])),
-    field('PoP deadline', h('input', { type: 'date', id: 'popDeadline', onchange: e => f.proof_of_purchase_deadline = e.target.value || null })),
-    h('div', { class: 'full' }, [h('label', {}, 'Notes'), h('textarea', { onchange: e => f.notes = e.target.value || null })]),
+    field(t('budget.form.popDeadline'), h('input', { type: 'date', value: f.proof_of_purchase_deadline,
+      onchange: e => f.proof_of_purchase_deadline = e.target.value || null })),
+    h('div', { class: 'full' }, [h('label', {}, t('col.notes')), h('textarea', { onchange: e => f.notes = e.target.value || null })]),
     h('div', { class: 'full row' }, [
       h('button', { onclick: async () => {
-        if (!f.date || !f.amount || !f.payment_type) { toast('Date, amount and type are required.', true); return; }
+        if (!f.date || !f.amount || !f.payment_type) { toast(t('budget.toast.paymentReq'), true); return; }
         await ins('payments', f);
-      } }, 'Save payment'),
-      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, 'Cancel'),
-      h('span', { class: 'sub', text: 'For a material advance, set the PoP deadline to 10 business days after the disbursement date.' }),
+      } }, t('budget.form.savePayment')),
+      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, t('common.cancel')),
+      h('span', { class: 'sub', text: t('budget.form.paymentHint') }),
     ]),
-  ]);
-  host.append(form);
-  // prefill PoP deadline suggestion
-  setTimeout(() => { const d = $('popDeadline'); if (d) d.value = bizDeadline(TODAY); f.proof_of_purchase_deadline = bizDeadline(TODAY); }, 0);
+  ]));
 }
-const field = (label, node) => h('div', {}, [h('label', {}, label), node]);
 
 /* ---------------- Invoices ---------------- */
 function viewInvoices(v) {
-  v.append(h('div', { class: 'spread' }, [h('h2', {}, 'Invoices received'), ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('invoiceForm', invoiceForm) }, '+ Add invoice'))]));
+  v.append(h('div', { class: 'spread' }, [h('h2', {}, t('invoices.heading')),
+    ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('invoiceForm', invoiceForm) }, t('invoices.add')))]));
   v.append(h('div', { id: 'invoiceForm' }));
   v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
-    h('thead', {}, h('tr', {}, ['Received', 'Vendor', 'Amount', 'Milestone', 'Applied', 'Status', 'Notes', ''].map(x => h('th', { class: x === 'Amount' || x === 'Applied' ? 'num' : '' }, x)))),
+    h('thead', {}, h('tr', {}, [
+      [t('col.received'), 0], [t('col.vendor'), 0], [t('col.amount'), 1], [t('col.milestone'), 0],
+      [t('col.applied'), 1], [t('col.status'), 0], [t('col.notes'), 0], ['', 0],
+    ].map(([x, n]) => h('th', { class: n ? 'num' : '' }, x)))),
     h('tbody', {}, S.invoices.map(inv => {
       const applied = S.links.filter(l => l.invoice_id === inv.id).reduce((s, l) => s + Number(l.amount_applied), 0);
       return h('tr', {}, [
@@ -645,12 +966,13 @@ function viewInvoices(v) {
     })),
   ])));
 
-  // linking
-  v.append(h('h3', {}, 'Payment ↔ invoice links (many-to-many)'));
-  v.append(h('div', { class: 'sub', text: 'Matching is rarely 1:1 — one payment can cover several invoices, one invoice can be paid across several payments.' }));
+  v.append(h('h3', {}, t('invoices.linkHeading')));
+  v.append(h('div', { class: 'sub', text: t('invoices.linkSub') }));
   if (S.isOwner) v.append(linkForm());
   v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
-    h('thead', {}, h('tr', {}, ['Payment', 'Invoice', 'Applied', ''].map(x => h('th', { class: x === 'Applied' ? 'num' : '' }, x)))),
+    h('thead', {}, h('tr', {}, [
+      [t('invoices.link.payment'), 0], [t('invoices.link.invoice'), 0], [t('col.applied'), 1], ['', 0],
+    ].map(([x, n]) => h('th', { class: n ? 'num' : '' }, x)))),
     h('tbody', {}, S.links.map(l => {
       const p = S.payments.find(x => x.id === l.payment_id), inv = S.invoices.find(x => x.id === l.invoice_id);
       return h('tr', {}, [
@@ -665,52 +987,52 @@ function viewInvoices(v) {
 function invoiceForm(host) {
   const f = { status: 'unmatched' };
   host.append(h('div', { class: 'inline-form' }, [
-    field('Date received', h('input', { type: 'date', value: TODAY, onchange: e => f.date_received = e.target.value })),
-    field('Vendor', h('input', { type: 'text', onchange: e => f.vendor = e.target.value })),
-    field('Amount (USD)', h('input', { type: 'number', step: '0.01', onchange: e => f.amount = Number(e.target.value) })),
-    field('Milestone', h('select', { onchange: e => f.milestone_id = e.target.value || null }, [
+    field(t('invoices.form.dateReceived'), h('input', { type: 'date', value: TODAY, onchange: e => f.date_received = e.target.value })),
+    field(t('col.vendor'), h('input', { type: 'text', onchange: e => f.vendor = e.target.value })),
+    field(t('budget.form.amount'), h('input', { type: 'number', step: '0.01', onchange: e => f.amount = Number(e.target.value) })),
+    field(t('col.milestone'), h('select', { onchange: e => f.milestone_id = e.target.value || null }, [
       h('option', { value: '' }, '—'), ...S.milestones.map(m => h('option', { value: m.id }, m.id)),
     ])),
-    h('div', { class: 'full' }, [h('label', {}, 'Notes'), h('textarea', { onchange: e => f.notes = e.target.value || null })]),
+    h('div', { class: 'full' }, [h('label', {}, t('col.notes')), h('textarea', { onchange: e => f.notes = e.target.value || null })]),
     h('div', { class: 'full row' }, [
       h('button', { onclick: async () => {
-        if (!f.date_received || !f.vendor || !f.amount) { toast('Date, vendor and amount are required.', true); return; }
+        if (!f.date_received || !f.vendor || !f.amount) { toast(t('invoices.toast.invoiceReq'), true); return; }
         await ins('invoices', f);
-      } }, 'Save invoice'),
-      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, 'Cancel'),
+      } }, t('invoices.form.saveInvoice')),
+      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, t('common.cancel')),
     ]),
   ]));
 }
 function linkForm() {
   const f = {};
   return h('div', { class: 'inline-form' }, [
-    field('Payment', h('select', { onchange: e => f.payment_id = e.target.value }, [
+    field(t('invoices.link.payment'), h('select', { onchange: e => f.payment_id = e.target.value }, [
       h('option', { value: '' }, '—'), ...S.payments.map(p => h('option', { value: p.id }, `${p.date} ${money(p.amount)} ${p.recipient || ''}`)),
     ])),
-    field('Invoice', h('select', { onchange: e => f.invoice_id = e.target.value }, [
+    field(t('invoices.link.invoice'), h('select', { onchange: e => f.invoice_id = e.target.value }, [
       h('option', { value: '' }, '—'), ...S.invoices.map(i => h('option', { value: i.id }, `${i.vendor} ${money(i.amount)}`)),
     ])),
-    field('Amount applied', h('input', { type: 'number', step: '0.01', onchange: e => f.amount_applied = Number(e.target.value) })),
+    field(t('invoices.link.amountApplied'), h('input', { type: 'number', step: '0.01', onchange: e => f.amount_applied = Number(e.target.value) })),
     h('div', { class: 'row' }, h('button', { onclick: async () => {
-      if (!f.payment_id || !f.invoice_id || !f.amount_applied) { toast('All three fields are required.', true); return; }
+      if (!f.payment_id || !f.invoice_id || !f.amount_applied) { toast(t('invoices.toast.linkReq'), true); return; }
       await ins('payment_invoice_links', f);
-    } }, 'Link')),
+    } }, t('invoices.link.link'))),
   ]);
 }
 
 /* ---------------- Permits ---------------- */
 function viewPermits(v) {
-  v.append(h('h2', {}, 'Permits & hard gates'));
-  v.append(h('div', { class: 'sub', text: 'Status + document tracking only. CAR insurance is listed here because it is a hard gate before H1 (Art 5.3).' }));
+  v.append(h('h2', {}, t('permits.heading')));
+  v.append(h('div', { class: 'sub', text: t('permits.sub') }));
   v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
-    h('thead', {}, h('tr', {}, ['#', 'Permit / approval', 'Status', 'Completed', 'Responsible', 'Notes'].map(x => h('th', {}, x)))),
+    h('thead', {}, h('tr', {}, [t('col.num'), t('col.permitType'), t('col.status'), t('col.completed'), t('col.responsible'), t('col.notes')].map(x => h('th', {}, x)))),
     h('tbody', {}, S.permits.map(p => h('tr', {}, [
       h('td', {}, p.seq ?? '—'),
       h('td', {}, p.type),
       h('td', {}, selectCell(p.status, ['not_started', 'submitted', 'under_review', 'approved'],
         val => upd('permits', { id: p.id }, { status: val, updated_at: new Date().toISOString() }, p.id))),
       h('td', {}, dateCell(p.completion_date, val => upd('permits', { id: p.id }, { completion_date: val }, p.id))),
-      h('td', {}, textCellEdit(p.responsible_party, val => upd('permits', { id: p.id }, { responsible_party: val }, p.id), 'contractor / owner')),
+      h('td', {}, textCellEdit(p.responsible_party, val => upd('permits', { id: p.id }, { responsible_party: val }, p.id), t('permits.responsiblePh'))),
       h('td', {}, p.notes || '—'),
     ]))),
   ])));
@@ -718,24 +1040,25 @@ function viewPermits(v) {
 
 /* ---------------- Decision log ---------------- */
 function viewDecisions(v) {
-  v.append(h('div', { class: 'spread' }, [h('h2', {}, 'Decision / change log'), ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('decisionForm', decisionForm) }, '+ Add entry'))]));
-  v.append(h('div', { class: 'sub', text: 'Anything from email / WhatsApp / paper that changes scope, price or schedule. Manual entry for v1. "Confirmed" is the "it does not count until you say so" gate.' }));
+  v.append(h('div', { class: 'spread' }, [h('h2', {}, t('decisions.heading')),
+    ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('decisionForm', decisionForm) }, t('decisions.add')))]));
+  v.append(h('div', { class: 'sub', text: t('decisions.sub') }));
   v.append(h('div', { id: 'decisionForm' }));
   const unconfirmed = S.decisions.filter(d => !d.confirmed);
   if (unconfirmed.length) {
-    v.append(h('h3', {}, `Awaiting confirmation (${unconfirmed.length})`));
+    v.append(h('h3', {}, t('decisions.awaiting', { n: unconfirmed.length })));
     v.append(decisionTable(unconfirmed));
   }
-  v.append(h('h3', {}, 'Confirmed'));
+  v.append(h('h3', {}, t('decisions.confirmed')));
   v.append(decisionTable(S.decisions.filter(d => d.confirmed)));
 }
 function decisionTable(rows) {
-  if (!rows.length) return h('div', { class: 'placeholder', text: 'Nothing here.' });
+  if (!rows.length) return h('div', { class: 'placeholder', text: t('decisions.nothing') });
   return h('div', { class: 'tbl-scroll' }, h('table', {}, [
-    h('thead', {}, h('tr', {}, ['Date', 'Source', 'Party', 'Summary', 'Resolves', 'Confirmed', ''].map(x => h('th', {}, x)))),
+    h('thead', {}, h('tr', {}, [t('col.date'), t('col.source'), t('col.party'), t('col.summary'), t('col.resolves'), t('col.confirmed'), ''].map(x => h('th', {}, x)))),
     h('tbody', {}, rows.map(d => h('tr', {}, [
       h('td', {}, d.date),
-      h('td', {}, d.source),
+      h('td', {}, t('source.' + d.source, {}) || d.source),
       h('td', {}, d.party || '—'),
       h('td', {}, d.summary),
       h('td', {}, d.resolves || '—'),
@@ -747,29 +1070,33 @@ function decisionTable(rows) {
 function decisionForm(host) {
   const f = { source: 'whatsapp', confirmed: false };
   host.append(h('div', { class: 'inline-form' }, [
-    field('Date', h('input', { type: 'date', value: TODAY, onchange: e => f.date = e.target.value })),
-    field('Source', h('select', { onchange: e => f.source = e.target.value }, ['whatsapp', 'email', 'manual', 'other'].map(s => h('option', { value: s }, s)))),
-    field('Party', h('input', { type: 'text', placeholder: 'who', onchange: e => f.party = e.target.value || null })),
-    field('Resolves', h('input', { type: 'text', placeholder: 'Art / scope item', onchange: e => f.resolves = e.target.value || null })),
-    h('div', { class: 'full' }, [h('label', {}, 'Summary / quoted text'), h('textarea', { onchange: e => f.summary = e.target.value })]),
+    field(t('col.date'), h('input', { type: 'date', value: TODAY, onchange: e => f.date = e.target.value })),
+    field(t('col.source'), h('select', { onchange: e => f.source = e.target.value }, ['whatsapp', 'email', 'manual', 'other'].map(s => h('option', { value: s }, t('source.' + s))))),
+    field(t('col.party'), h('input', { type: 'text', placeholder: t('decisions.form.partyPh'), onchange: e => f.party = e.target.value || null })),
+    field(t('col.resolves'), h('input', { type: 'text', placeholder: t('decisions.form.resolvesPh'), onchange: e => f.resolves = e.target.value || null })),
+    h('div', { class: 'full' }, [h('label', {}, t('decisions.form.summaryLabel')), h('textarea', { onchange: e => f.summary = e.target.value })]),
     h('div', { class: 'full row' }, [
-      h('label', { style: 'margin:0' }, [h('input', { type: 'checkbox', onchange: e => f.confirmed = e.target.checked }), ' confirmed']),
+      h('label', { style: 'margin:0' }, [h('input', { type: 'checkbox', onchange: e => f.confirmed = e.target.checked }), ' ' + t('decisions.form.confirmedLabel')]),
       h('button', { onclick: async () => {
-        if (!f.date || !f.summary) { toast('Date and summary are required.', true); return; }
+        if (!f.date || !f.summary) { toast(t('decisions.toast.req'), true); return; }
         await ins('decision_log', f);
-      } }, 'Save entry'),
-      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, 'Cancel'),
+      } }, t('decisions.form.saveEntry')),
+      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, t('common.cancel')),
     ]),
   ]));
 }
 
 /* ---------------- Change requests ---------------- */
 function viewChanges(v) {
-  v.append(h('div', { class: 'spread' }, [h('h2', {}, 'Change requests'), ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('changeForm', changeForm) }, '+ New request'))]));
-  v.append(h('div', { class: 'sub', text: 'Modifications to the live Bripo contract, two-party sign-off. No automatic budget/milestone recalculation in v1 — log it flat.' }));
+  v.append(h('div', { class: 'spread' }, [h('h2', {}, t('changes.heading')),
+    ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('changeForm', changeForm) }, t('changes.add')))]));
+  v.append(h('div', { class: 'sub', text: t('changes.sub') }));
   v.append(h('div', { id: 'changeForm' }));
   v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
-    h('thead', {}, h('tr', {}, ['Submitted', 'Description', 'Cost', 'Sched (d)', 'Owner', 'Developer', 'Evidence', 'Status', ''].map(x => h('th', { class: x === 'Cost' ? 'num' : '' }, x)))),
+    h('thead', {}, h('tr', {}, [
+      [t('col.submitted'), 0], [t('col.description'), 0], [t('col.cost'), 1], [t('col.schedDays'), 1],
+      [t('col.owner'), 0], [t('col.developer'), 0], [t('col.evidence'), 0], [t('col.status'), 0], ['', 0],
+    ].map(([x, n]) => h('th', { class: n ? 'num' : '' }, x)))),
     h('tbody', {}, S.changes.map(c => h('tr', {}, [
       h('td', {}, c.date_submitted),
       h('td', {}, c.description),
@@ -777,7 +1104,7 @@ function viewChanges(v) {
       h('td', { class: 'num' }, c.schedule_impact_days ?? '—'),
       h('td', {}, selectCell(c.owner_approval, ['pending', 'approved', 'rejected'], val => upd('change_requests', { id: c.id }, { owner_approval: val }, c.id))),
       h('td', {}, selectCell(c.developer_approval, ['pending', 'approved', 'rejected'], val => upd('change_requests', { id: c.id }, { developer_approval: val }, c.id))),
-      h('td', {}, textCellEdit(c.developer_approval_evidence, val => upd('change_requests', { id: c.id }, { developer_approval_evidence: val }, c.id), 'email confirmation…')),
+      h('td', {}, textCellEdit(c.developer_approval_evidence, val => upd('change_requests', { id: c.id }, { developer_approval_evidence: val }, c.id), t('changes.form.evidencePh'))),
       h('td', {}, selectCell(c.status, ['proposed', 'approved', 'rejected', 'superseded'], val => upd('change_requests', { id: c.id }, { status: val }, c.id))),
       h('td', {}, ownerOnly(h('button', { class: 'ghost sm', onclick: () => del('change_requests', { id: c.id }, c.id) }, '×'))),
     ]))),
@@ -786,23 +1113,26 @@ function viewChanges(v) {
 function changeForm(host) {
   const f = {};
   host.append(h('div', { class: 'inline-form' }, [
-    h('div', { class: 'full' }, [h('label', {}, 'Description'), h('textarea', { onchange: e => f.description = e.target.value })]),
-    field('Cost impact (USD)', h('input', { type: 'number', step: '0.01', onchange: e => f.cost_impact = e.target.value === '' ? null : Number(e.target.value) })),
-    field('Schedule impact (days)', h('input', { type: 'number', onchange: e => f.schedule_impact_days = e.target.value === '' ? null : Number(e.target.value) })),
+    h('div', { class: 'full' }, [h('label', {}, t('col.description')), h('textarea', { onchange: e => f.description = e.target.value })]),
+    field(t('changes.form.costImpact'), h('input', { type: 'number', step: '0.01', onchange: e => f.cost_impact = e.target.value === '' ? null : Number(e.target.value) })),
+    field(t('changes.form.schedImpact'), h('input', { type: 'number', onchange: e => f.schedule_impact_days = e.target.value === '' ? null : Number(e.target.value) })),
     h('div', { class: 'row' }, [
-      h('button', { onclick: async () => { if (!f.description) { toast('Description is required.', true); return; } await ins('change_requests', f); } }, 'Save request'),
-      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, 'Cancel'),
+      h('button', { onclick: async () => { if (!f.description) { toast(t('changes.toast.req'), true); return; } await ins('change_requests', f); } }, t('changes.form.saveRequest')),
+      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, t('common.cancel')),
     ]),
   ]));
 }
 
 /* ---------------- Future work ---------------- */
 function viewFuture(v) {
-  v.append(h('div', { class: 'spread' }, [h('h2', {}, 'Future / independent work items'), ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('futureForm', futureForm) }, '+ Add item'))]));
-  v.append(h('div', { class: 'sub', text: 'Scope you are considering that is NOT a modification to the signed Bripo contract — could become its own contract, possibly a different vendor. Not routed through change-request sign-off.' }));
+  v.append(h('div', { class: 'spread' }, [h('h2', {}, t('future.heading')),
+    ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('futureForm', futureForm) }, t('future.add')))]));
+  v.append(h('div', { class: 'sub', text: t('future.sub') }));
   v.append(h('div', { id: 'futureForm' }));
   v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
-    h('thead', {}, h('tr', {}, ['Description', 'Est. cost', 'Status', 'Potential vendor', 'Time-sensitive', ''].map(x => h('th', { class: x === 'Est. cost' ? 'num' : '' }, x)))),
+    h('thead', {}, h('tr', {}, [
+      [t('col.description'), 0], [t('col.estCost'), 1], [t('col.status'), 0], [t('col.potentialVendor'), 0], [t('col.timeSensitive'), 0], ['', 0],
+    ].map(([x, n]) => h('th', { class: n ? 'num' : '' }, x)))),
     h('tbody', {}, S.future.map(it => h('tr', {}, [
       h('td', {}, it.description),
       h('td', { class: 'num' }, it.estimated_cost == null ? '—' : money2(it.estimated_cost)),
@@ -816,23 +1146,24 @@ function viewFuture(v) {
 function futureForm(host) {
   const f = { status: 'idea' };
   host.append(h('div', { class: 'inline-form' }, [
-    h('div', { class: 'full' }, [h('label', {}, 'Description'), h('textarea', { onchange: e => f.description = e.target.value })]),
-    field('Estimated cost (USD)', h('input', { type: 'number', step: '0.01', onchange: e => f.estimated_cost = e.target.value === '' ? null : Number(e.target.value) })),
-    field('Potential vendor', h('input', { type: 'text', onchange: e => f.potential_vendor = e.target.value || null })),
-    h('div', { class: 'full' }, [h('label', {}, 'Time-sensitive note'), h('input', { type: 'text', onchange: e => f.time_sensitive_note = e.target.value || null })]),
+    h('div', { class: 'full' }, [h('label', {}, t('col.description')), h('textarea', { onchange: e => f.description = e.target.value })]),
+    field(t('future.form.estCost'), h('input', { type: 'number', step: '0.01', onchange: e => f.estimated_cost = e.target.value === '' ? null : Number(e.target.value) })),
+    field(t('col.potentialVendor'), h('input', { type: 'text', onchange: e => f.potential_vendor = e.target.value || null })),
+    h('div', { class: 'full' }, [h('label', {}, t('future.form.timeSensitive')), h('input', { type: 'text', onchange: e => f.time_sensitive_note = e.target.value || null })]),
     h('div', { class: 'row' }, [
-      h('button', { onclick: async () => { if (!f.description) { toast('Description is required.', true); return; } await ins('future_work_items', f); } }, 'Save item'),
-      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, 'Cancel'),
+      h('button', { onclick: async () => { if (!f.description) { toast(t('future.toast.req'), true); return; } await ins('future_work_items', f); } }, t('future.form.saveItem')),
+      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, t('common.cancel')),
     ]),
   ]));
 }
 
 /* ---------------- Vendors ---------------- */
 function viewVendors(v) {
-  v.append(h('div', { class: 'spread' }, [h('h2', {}, 'Vendors & contacts'), ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('vendorForm', vendorForm) }, '+ Add vendor'))]));
+  v.append(h('div', { class: 'spread' }, [h('h2', {}, t('vendors.heading')),
+    ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('vendorForm', vendorForm) }, t('vendors.add')))]));
   v.append(h('div', { id: 'vendorForm' }));
   v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
-    h('thead', {}, h('tr', {}, ['Name', 'Role', 'Phone', 'Email', 'Notes', ''].map(x => h('th', {}, x)))),
+    h('thead', {}, h('tr', {}, [t('col.name'), t('col.role'), t('col.phone'), t('col.email'), t('col.notes'), ''].map(x => h('th', {}, x)))),
     h('tbody', {}, S.vendors.map(vn => h('tr', {}, [
       h('td', {}, textCellEdit(vn.name, val => upd('vendors', { id: vn.id }, { name: val }, vn.id))),
       h('td', {}, textCellEdit(vn.role, val => upd('vendors', { id: vn.id }, { role: val }, vn.id))),
@@ -846,45 +1177,45 @@ function viewVendors(v) {
 function vendorForm(host) {
   const f = {};
   host.append(h('div', { class: 'inline-form' }, [
-    field('Name', h('input', { type: 'text', onchange: e => f.name = e.target.value })),
-    field('Role', h('input', { type: 'text', onchange: e => f.role = e.target.value || null })),
-    field('Phone', h('input', { type: 'text', onchange: e => f.phone = e.target.value || null })),
-    field('Email', h('input', { type: 'text', onchange: e => f.email = e.target.value || null })),
-    h('div', { class: 'full' }, [h('label', {}, 'Notes'), h('textarea', { onchange: e => f.notes = e.target.value || null })]),
+    field(t('col.name'), h('input', { type: 'text', onchange: e => f.name = e.target.value })),
+    field(t('col.role'), h('input', { type: 'text', onchange: e => f.role = e.target.value || null })),
+    field(t('col.phone'), h('input', { type: 'text', onchange: e => f.phone = e.target.value || null })),
+    field(t('col.email'), h('input', { type: 'text', onchange: e => f.email = e.target.value || null })),
+    h('div', { class: 'full' }, [h('label', {}, t('col.notes')), h('textarea', { onchange: e => f.notes = e.target.value || null })]),
     h('div', { class: 'row' }, [
-      h('button', { onclick: async () => { if (!f.name) { toast('Name is required.', true); return; } await ins('vendors', f); } }, 'Save vendor'),
-      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, 'Cancel'),
+      h('button', { onclick: async () => { if (!f.name) { toast(t('vendors.toast.req'), true); return; } await ins('vendors', f); } }, t('vendors.form.saveVendor')),
+      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, t('common.cancel')),
     ]),
   ]));
 }
 
 /* ---------------- Documents ---------------- */
 function viewDocuments(v) {
-  v.append(h('h2', {}, 'Documents'));
-  v.append(h('div', { class: 'sub', text: 'Metadata index for files stored in the private "documents" Supabase Storage bucket (same RLS). Never store a public link. No cédula / RUC numbers.' }));
+  v.append(h('h2', {}, t('documents.heading')));
+  v.append(h('div', { class: 'sub', text: t('documents.sub') }));
   if (S.isOwner) {
     const f = {};
     v.append(h('div', { class: 'inline-form' }, [
-      field('File', h('input', { type: 'file', onchange: e => f.file = e.target.files[0] })),
-      field('Linked to', h('select', { onchange: e => f.linked_entity_type = e.target.value || null }, [
-        h('option', { value: '' }, '—'), ...['milestone', 'permit', 'payment', 'invoice', 'vendor', 'change_request'].map(t => h('option', { value: t }, t)),
+      field(t('documents.form.file'), h('input', { type: 'file', onchange: e => f.file = e.target.files[0] })),
+      field(t('documents.form.linkedTo'), h('select', { onchange: e => f.linked_entity_type = e.target.value || null }, [
+        h('option', { value: '' }, '—'), ...['milestone', 'permit', 'payment', 'invoice', 'vendor', 'change_request'].map(x => h('option', { value: x }, t('ent.' + x))),
       ])),
-      field('Entity id', h('input', { type: 'text', placeholder: 'e.g. H2', onchange: e => f.linked_entity_id = e.target.value || null })),
-      h('div', { class: 'row' }, h('button', { onclick: () => uploadDoc(f) }, 'Upload')),
+      field(t('documents.form.entityId'), h('input', { type: 'text', placeholder: t('documents.form.entityIdPh'), onchange: e => f.linked_entity_id = e.target.value || null })),
+      h('div', { class: 'row' }, h('button', { onclick: () => uploadDoc(f) }, t('documents.form.upload'))),
     ]));
   }
   v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
-    h('thead', {}, h('tr', {}, ['Filename', 'Linked', 'Uploaded', ''].map(x => h('th', {}, x)))),
+    h('thead', {}, h('tr', {}, [t('col.filename'), t('col.linked'), t('col.uploaded'), ''].map(x => h('th', {}, x)))),
     h('tbody', {}, S.documents.map(d => h('tr', {}, [
       h('td', {}, S.isOwner ? h('a', { href: '#', onclick: async ev => { ev.preventDefault(); await openDoc(d); } }, d.filename) : d.filename),
-      h('td', {}, d.linked_entity_type ? `${d.linked_entity_type} ${d.linked_entity_id || ''}` : '—'),
+      h('td', {}, d.linked_entity_type ? `${t('ent.' + d.linked_entity_type, {}) || d.linked_entity_type} ${d.linked_entity_id || ''}` : '—'),
       h('td', {}, (d.uploaded_at || '').slice(0, 10)),
       h('td', {}, ownerOnly(h('button', { class: 'ghost sm', onclick: () => del('documents', { id: d.id }, d.id) }, '×'))),
     ]))),
   ])));
 }
 async function uploadDoc(f) {
-  if (!f.file) { toast('Choose a file.', true); return; }
+  if (!f.file) { toast(t('documents.toast.chooseFile'), true); return; }
   const path = `${Date.now()}_${f.file.name}`.replace(/[^\w.\-]/g, '_');
   const { error } = await db.storage.from('documents').upload(path, f.file);
   if (error) { toast('Upload: ' + error.message, true); return; }
@@ -903,9 +1234,50 @@ function toggleForm(hostId, builder) {
   builder(host);
 }
 
+/* ---------------- static text + language ---------------- */
+function applyStaticText() {
+  document.documentElement.lang = LANG;
+  $('appSubtitle').textContent = t('app.subtitle');
+  $('lblEmail').textContent = t('login.email');
+  $('lblPassword').textContent = t('login.password');
+  $('loginBtn').textContent = t('login.signin');
+  $('signupBtn').textContent = t('login.signup');
+  $('loginNote').textContent = t('login.note');
+  $('logoutBtn').textContent = t('app.signout');
+  $('rawSummary').textContent = t('raw.summary');
+  $('rawNote').textContent = t('raw.note');
+}
+function renderLang() {
+  const box = $('langToggle'); box.innerHTML = '';
+  for (const l of ['en', 'es'])
+    box.append(h('button', { class: l === LANG ? 'active' : '', onclick: () => setLang(l) }, l.toUpperCase()));
+}
+function setLang(l) {
+  LANG = l;
+  try { localStorage.setItem('bripo_lang', l); } catch (e) {}
+  renderLang();
+  applyStaticText();
+  renderWho();
+  if (S.session && S.member) render();
+  else if (S.session && !S.member) renderNotMember();
+}
+function renderWho() {
+  if (!S.session) return;
+  const roleTxt = !S.member ? t('role.none') : (S.isOwner ? t('role.owner') : t('role.viewer'));
+  $('who').textContent = S.session.user.email + ' · ' + roleTxt;
+}
+function renderNotMember() {
+  $('nav').innerHTML = '';
+  $('view').innerHTML = '';
+  $('view').append(h('div', { class: 'placeholder', html:
+    t('login.notmember', { email: S.session.user.email }) + '<br>' + t('login.notmember2')
+    + `<br><code>insert into app_users (user_id, email, role) values ('${S.session.user.id}', '${S.session.user.email}', 'owner');</code>` }));
+}
+
 /* ---------------- auth ---------------- */
 async function refresh() {
   const { data: { session } } = await db.auth.getSession();
+  S.session = session;
   const authed = !!session;
   $('login').classList.toggle('hide', authed);
   $('app').classList.toggle('hide', !authed);
@@ -915,34 +1287,31 @@ async function refresh() {
   let member = false;
   try { const { data } = await db.rpc('is_member'); member = !!data; } catch (e) {}
   try { const { data } = await db.rpc('is_owner'); S.isOwner = !!data; } catch (e) { S.isOwner = false; }
-  $('who').textContent = session.user.email + (member ? (S.isOwner ? ' · owner' : ' · viewer') : ' · not on the allow-list');
+  S.member = member;
+  renderWho();
 
-  if (!member) {
-    $('view').innerHTML = '';
-    $('nav').innerHTML = '';
-    $('view').append(h('div', { class: 'placeholder', html:
-      `This account (<code>${session.user.email}</code>) is authenticated but not on the allow-list, so no data is visible.<br>`
-      + `The owner adds it with:<br><code>insert into app_users (user_id, email, role) values ('${session.user.id}', '${session.user.email}', 'owner');</code>` }));
-    return;
-  }
+  if (!member) { renderNotMember(); return; }
   await loadAll();
   render();
 }
 
 $('loginBtn').addEventListener('click', async () => {
-  const m = $('loginMsg'); m.textContent = 'Signing in…'; m.classList.remove('err');
+  const m = $('loginMsg'); m.textContent = t('login.signingin'); m.classList.remove('err');
   const { error } = await db.auth.signInWithPassword({ email: $('email').value.trim(), password: $('password').value });
   if (error) { m.textContent = error.message; m.classList.add('err'); return; }
   m.textContent = '';
 });
 $('signupBtn').addEventListener('click', async () => {
-  const m = $('loginMsg'); m.textContent = 'Creating account…'; m.classList.remove('err');
+  const m = $('loginMsg'); m.textContent = t('login.creating'); m.classList.remove('err');
   const { error } = await db.auth.signUp({ email: $('email').value.trim(), password: $('password').value });
   if (error) { m.textContent = error.message; m.classList.add('err'); return; }
-  m.textContent = 'Account created. If email confirmation is on, confirm then sign in. Then the owner adds you to the allow-list.';
+  m.textContent = t('login.created');
 });
 $('logoutBtn').addEventListener('click', async () => { await db.auth.signOut(); location.reload(); });
 db.auth.onAuthStateChange(() => refresh());
+
+renderLang();
+applyStaticText();
 refresh();
 </script>
 </body>
