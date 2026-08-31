@@ -1,0 +1,652 @@
+{
+  "activity_log": [
+    {
+      "column": "id",
+      "default": null,
+      "nullable": false,
+      "type": "bigint"
+    },
+    {
+      "column": "at",
+      "default": "now()",
+      "nullable": false,
+      "type": "timestamp with time zone"
+    },
+    {
+      "column": "actor",
+      "default": "auth.uid()",
+      "nullable": true,
+      "type": "uuid"
+    },
+    {
+      "column": "entity",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "entity_id",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "action",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "detail",
+      "default": null,
+      "nullable": true,
+      "type": "jsonb"
+    }
+  ],
+  "app_users": [
+    {
+      "column": "user_id",
+      "default": null,
+      "nullable": false,
+      "type": "uuid"
+    },
+    {
+      "column": "email",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "role",
+      "default": "'owner'::text",
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "added_at",
+      "default": "now()",
+      "nullable": false,
+      "type": "timestamp with time zone"
+    }
+  ],
+  "change_requests": [
+    {
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": false,
+      "type": "uuid"
+    },
+    {
+      "column": "description",
+      "default": null,
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "cost_impact",
+      "default": null,
+      "nullable": true,
+      "type": "numeric"
+    },
+    {
+      "column": "schedule_impact_days",
+      "default": null,
+      "nullable": true,
+      "type": "integer"
+    },
+    {
+      "column": "date_submitted",
+      "default": "CURRENT_DATE",
+      "nullable": false,
+      "type": "date"
+    },
+    {
+      "column": "owner_approval",
+      "default": "'pending'::text",
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "developer_approval",
+      "default": "'pending'::text",
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "developer_approval_evidence",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "status",
+      "default": "'proposed'::text",
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "created_at",
+      "default": "now()",
+      "nullable": false,
+      "type": "timestamp with time zone"
+    }
+  ],
+  "contract_meta": [
+    {
+      "column": "id",
+      "default": "'current'::text",
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "contract_price",
+      "default": "73500",
+      "nullable": false,
+      "type": "numeric"
+    },
+    {
+      "column": "contract_name",
+      "default": "'Bripo Tiny House'::text",
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "weeks_allowed",
+      "default": "21",
+      "nullable": false,
+      "type": "integer"
+    },
+    {
+      "column": "h1_disbursement_date",
+      "default": null,
+      "nullable": true,
+      "type": "date"
+    },
+    {
+      "column": "delay_penalty_per_week",
+      "default": "250",
+      "nullable": false,
+      "type": "numeric"
+    },
+    {
+      "column": "delay_penalty_cap",
+      "default": "7350",
+      "nullable": false,
+      "type": "numeric"
+    },
+    {
+      "column": "warranty_labor_years",
+      "default": "2",
+      "nullable": false,
+      "type": "integer"
+    },
+    {
+      "column": "warranty_structural_years",
+      "default": "10",
+      "nullable": false,
+      "type": "integer"
+    },
+    {
+      "column": "final_delivery_date",
+      "default": null,
+      "nullable": true,
+      "type": "date"
+    },
+    {
+      "column": "updated_at",
+      "default": "now()",
+      "nullable": false,
+      "type": "timestamp with time zone"
+    }
+  ],
+  "decision_log": [
+    {
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": false,
+      "type": "uuid"
+    },
+    {
+      "column": "source",
+      "default": null,
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "date",
+      "default": null,
+      "nullable": false,
+      "type": "date"
+    },
+    {
+      "column": "party",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "summary",
+      "default": null,
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "resolves",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "confirmed",
+      "default": "false",
+      "nullable": false,
+      "type": "boolean"
+    },
+    {
+      "column": "created_at",
+      "default": "now()",
+      "nullable": false,
+      "type": "timestamp with time zone"
+    }
+  ],
+  "documents": [
+    {
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": false,
+      "type": "uuid"
+    },
+    {
+      "column": "filename",
+      "default": null,
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "storage_path",
+      "default": null,
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "linked_entity_type",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "linked_entity_id",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "uploaded_at",
+      "default": "now()",
+      "nullable": false,
+      "type": "timestamp with time zone"
+    }
+  ],
+  "future_work_items": [
+    {
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": false,
+      "type": "uuid"
+    },
+    {
+      "column": "description",
+      "default": null,
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "estimated_cost",
+      "default": null,
+      "nullable": true,
+      "type": "numeric"
+    },
+    {
+      "column": "status",
+      "default": "'idea'::text",
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "potential_vendor",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "time_sensitive_note",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "created_at",
+      "default": "now()",
+      "nullable": false,
+      "type": "timestamp with time zone"
+    }
+  ],
+  "invoices": [
+    {
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": false,
+      "type": "uuid"
+    },
+    {
+      "column": "vendor",
+      "default": null,
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "amount",
+      "default": null,
+      "nullable": false,
+      "type": "numeric"
+    },
+    {
+      "column": "date_received",
+      "default": null,
+      "nullable": false,
+      "type": "date"
+    },
+    {
+      "column": "milestone_id",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "status",
+      "default": "'unmatched'::text",
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "notes",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "created_at",
+      "default": "now()",
+      "nullable": false,
+      "type": "timestamp with time zone"
+    }
+  ],
+  "milestones": [
+    {
+      "column": "id",
+      "default": null,
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "seq",
+      "default": null,
+      "nullable": false,
+      "type": "integer"
+    },
+    {
+      "column": "name",
+      "default": null,
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "pct_of_contract",
+      "default": null,
+      "nullable": false,
+      "type": "numeric"
+    },
+    {
+      "column": "contract_amount",
+      "default": null,
+      "nullable": false,
+      "type": "numeric"
+    },
+    {
+      "column": "approval_gate_notes",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "status",
+      "default": "'not_started'::text",
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "planned_date",
+      "default": null,
+      "nullable": true,
+      "type": "date"
+    },
+    {
+      "column": "actual_date",
+      "default": null,
+      "nullable": true,
+      "type": "date"
+    },
+    {
+      "column": "paz_y_salvo_on_file",
+      "default": "false",
+      "nullable": false,
+      "type": "boolean"
+    },
+    {
+      "column": "director_de_obra_approved",
+      "default": "false",
+      "nullable": false,
+      "type": "boolean"
+    },
+    {
+      "column": "notes",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "updated_at",
+      "default": "now()",
+      "nullable": false,
+      "type": "timestamp with time zone"
+    }
+  ],
+  "payment_invoice_links": [
+    {
+      "column": "payment_id",
+      "default": null,
+      "nullable": false,
+      "type": "uuid"
+    },
+    {
+      "column": "invoice_id",
+      "default": null,
+      "nullable": false,
+      "type": "uuid"
+    },
+    {
+      "column": "amount_applied",
+      "default": null,
+      "nullable": false,
+      "type": "numeric"
+    }
+  ],
+  "payments": [
+    {
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": false,
+      "type": "uuid"
+    },
+    {
+      "column": "date",
+      "default": null,
+      "nullable": false,
+      "type": "date"
+    },
+    {
+      "column": "amount",
+      "default": null,
+      "nullable": false,
+      "type": "numeric"
+    },
+    {
+      "column": "recipient",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "method",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "payment_type",
+      "default": null,
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "milestone_id",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "advance_category",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "proof_of_purchase_received",
+      "default": "false",
+      "nullable": false,
+      "type": "boolean"
+    },
+    {
+      "column": "proof_of_purchase_deadline",
+      "default": null,
+      "nullable": true,
+      "type": "date"
+    },
+    {
+      "column": "proof_of_delivery_received",
+      "default": "false",
+      "nullable": false,
+      "type": "boolean"
+    },
+    {
+      "column": "notes",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "created_at",
+      "default": "now()",
+      "nullable": false,
+      "type": "timestamp with time zone"
+    }
+  ],
+  "permits": [
+    {
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": false,
+      "type": "uuid"
+    },
+    {
+      "column": "seq",
+      "default": null,
+      "nullable": true,
+      "type": "integer"
+    },
+    {
+      "column": "type",
+      "default": null,
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "notes",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "status",
+      "default": "'not_started'::text",
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "completion_date",
+      "default": null,
+      "nullable": true,
+      "type": "date"
+    },
+    {
+      "column": "responsible_party",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "updated_at",
+      "default": "now()",
+      "nullable": false,
+      "type": "timestamp with time zone"
+    }
+  ],
+  "vendors": [
+    {
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": false,
+      "type": "uuid"
+    },
+    {
+      "column": "name",
+      "default": null,
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "role",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "phone",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "email",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "notes",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    }
+  ]
+}

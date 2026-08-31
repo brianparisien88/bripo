@@ -1,0 +1,14 @@
+# secrets — this line first, before any file that could hold one
+.env
+.env.*
+!.env.example
+
+# os / editor
+.DS_Store
+*.swp
+__pycache__/
+node_modules/
+
+# charter references professional names, a lot number, an LLC — keep it local,
+# not in the public repo. The build session reads it from disk.
+docs/CHARTER.md
