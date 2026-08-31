@@ -15,87 +15,935 @@
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);
     font:14px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
-  .wrap{max-width:1100px;margin:0 auto;padding:28px 20px 60px;}
+  a{color:var(--accent)}
+  .wrap{max-width:1180px;margin:0 auto;padding:22px 20px 80px;}
   h1{font-size:20px;margin:0 0 2px;}
-  .sub{color:var(--muted);font-size:13px;margin-bottom:22px;}
+  h2{font-size:15px;margin:26px 0 10px;font-weight:600;}
+  h3{font-size:13px;margin:18px 0 8px;color:var(--muted);font-weight:600;
+    text-transform:uppercase;letter-spacing:.04em;}
+  .sub{color:var(--muted);font-size:13px;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .spread{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+
+  /* login */
   .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
     padding:22px;max-width:380px;}
   label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px;}
-  input{width:100%;background:var(--surface2);border:1px solid var(--border);
-    color:var(--text);border-radius:6px;padding:9px 11px;font-size:14px;outline:none;}
-  button{margin-top:16px;background:var(--accent);border:0;color:#fff;border-radius:6px;
-    padding:9px 18px;font-size:14px;font-weight:500;cursor:pointer;}
+  input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);
+    color:var(--text);border-radius:6px;padding:8px 10px;font-size:13px;outline:none;font-family:inherit;}
+  input[type=checkbox]{width:auto;}
+  textarea{min-height:56px;resize:vertical;}
+  button{background:var(--accent);border:0;color:#fff;border-radius:6px;
+    padding:8px 15px;font-size:13px;font-weight:500;cursor:pointer;}
+  button.ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+  button.sm{padding:4px 9px;font-size:12px;}
+  button:disabled{opacity:.5;cursor:default;}
   .msg{font-size:12px;color:var(--muted);margin-top:10px;min-height:16px;}
   .msg.err{color:var(--red);}
-  .hide{display:none;}
+  .hide{display:none!important;}
+
+  /* nav */
+  nav{display:flex;gap:2px;flex-wrap:wrap;border-bottom:1px solid var(--border);margin:16px 0 6px;}
+  nav button{background:none;color:var(--muted);border:0;border-bottom:2px solid transparent;
+    border-radius:0;padding:8px 12px;font-size:13px;}
+  nav button.active{color:var(--text);border-bottom-color:var(--accent);}
+
+  /* tiles */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0;}
+  .tile{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:13px 15px;}
+  .tile .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+  .tile .v{font-size:20px;margin-top:3px;font-variant-numeric:tabular-nums;}
+  .tile .v.mono{font-family:var(--mono);font-size:18px;}
+
+  /* progress bar */
+  .bar{height:9px;background:var(--surface2);border-radius:5px;overflow:hidden;margin:8px 0;}
+  .bar > i{display:block;height:100%;background:var(--green);}
+
+  /* tables */
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--border);vertical-align:top;}
+  th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em;}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);}
+  tr.sub-row td{background:var(--surface);color:var(--muted);font-size:12px;}
+  .tbl-scroll{overflow-x:auto;}
+
+  /* pills */
+  .pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:600;
+    border:1px solid var(--border);white-space:nowrap;}
+  .pill.green{color:var(--green);border-color:#1f5a2c;background:#12321c;}
+  .pill.amber{color:var(--amber);border-color:#5a4a1a;background:#322a12;}
+  .pill.red{color:var(--red);border-color:#5a2320;background:#331816;}
+  .pill.dim{color:var(--dim);}
+
+  /* attention panel */
+  .flag{display:flex;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;
+    margin:8px 0;background:var(--surface);}
+  .flag .dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex:none;}
+  .flag.red{border-color:#5a2320;} .flag.red .dot{background:var(--red);}
+  .flag.amber{border-color:#5a4a1a;} .flag.amber .dot{background:var(--amber);}
+  .flag .t{font-weight:600;} .flag .d{color:var(--muted);font-size:12px;}
+  .flag.big{padding:16px;} .flag.big .t{font-size:15px;}
+
   .placeholder{color:var(--dim);border:1px dashed var(--border);border-radius:10px;
-    padding:40px;text-align:center;margin-top:20px;}
+    padding:26px;text-align:center;}
+  .inline-form{background:var(--surface);border:1px solid var(--border);border-radius:9px;
+    padding:14px;margin:10px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;}
+  .inline-form .full{grid-column:1/-1;}
+  .inline-form label{margin-top:0;}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--surface2);
+    border:1px solid var(--border);border-radius:7px;padding:9px 16px;font-size:13px;
+    box-shadow:0 6px 24px #0008;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50;}
+  .toast.show{opacity:1;}
+  .toast.err{border-color:var(--red);color:#ffb3ae;}
+  .muted-cell{color:var(--dim);}
+  .ro-note{font-size:12px;color:var(--amber);margin-left:8px;}
+  details.raw{margin-top:20px;}
+  details.raw summary{cursor:pointer;color:var(--dim);font-size:12px;}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>bripo</h1>
-  <div class="sub">Altos de Maria construction dashboard</div>
+  <div class="spread">
+    <div>
+      <h1>bripo</h1>
+      <div class="sub">Altos de Maria construction dashboard</div>
+    </div>
+    <div id="sessionBox" class="row hide">
+      <span class="sub" id="who"></span>
+      <button id="logoutBtn" class="ghost sm">Sign out</button>
+    </div>
+  </div>
 
   <!-- LOGIN -->
-  <div id="login" class="card">
+  <div id="login" class="card" style="margin-top:22px;">
     <label>Email</label>
     <input id="email" type="email" autocomplete="username">
     <label>Password</label>
     <input id="password" type="password" autocomplete="current-password">
-    <button id="loginBtn">Sign in</button>
+    <div class="row" style="margin-top:16px;">
+      <button id="loginBtn">Sign in</button>
+      <button id="signupBtn" class="ghost">Create account</button>
+    </div>
     <div id="loginMsg" class="msg"></div>
-  </div>
-
-  <!-- APP (after auth) -->
-  <div id="app" class="hide">
-    <div class="sub" id="who"></div>
-    <button id="logoutBtn" style="background:var(--surface2);color:var(--text);
-      border:1px solid var(--border);margin:0;">Sign out</button>
-    <div class="placeholder">
-      Dashboard modules not built yet.<br>
-      Next session: build v1 per <code>docs/CHARTER.md</code>.
+    <div class="sub" style="margin-top:14px;font-size:11px;">
+      Access is controlled server-side (Supabase RLS). A new account sees nothing
+      until the owner adds it to the allow-list.
     </div>
   </div>
+
+  <!-- APP -->
+  <div id="app" class="hide">
+    <nav id="nav"></nav>
+    <div id="view"></div>
+    <details class="raw">
+      <summary>schema / raw</summary>
+      <div class="sub" style="margin-top:8px;">
+        Project <code>mxjoxxckekgtlvbmpkbd</code> &middot; USD only &middot; all figures from
+        the signed contract (Art 2.1, fixed price). Money math is deterministic
+        (no LLM): % complete, advance netting, the $250/week delay penalty.
+      </div>
+    </details>
+  </div>
 </div>
+<div id="toast" class="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // Publishable key = anon role, RLS applies. Safe to ship. No data is baked in;
-  // every table requires an allow-listed auth.uid() before returning a row.
-  const SUPABASE_URL = 'https://mxjoxxckekgtlvbmpkbd.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_wmwbM7-UkcdcLOwg3AmUPQ_eDu-XwK8';
-  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+/* ------------------------------------------------------------------ *
+ * bripo v1 dashboard — single file, vanilla JS, supabase-js + RLS.
+ * The publishable key below is the anon role; every table's RLS policy
+ * requires an allow-listed auth.uid() before a row is returned. Nothing
+ * is baked in at build time.
+ * ------------------------------------------------------------------ */
+const SUPABASE_URL = 'https://mxjoxxckekgtlvbmpkbd.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_wmwbM7-UkcdcLOwg3AmUPQ_eDu-XwK8';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const $ = id => document.getElementById(id);
+const $  = id => document.getElementById(id);
+const h  = (tag, attrs = {}, kids = []) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') n.className = v;
+    else if (k === 'html') n.innerHTML = v;
+    else if (k === 'text') n.textContent = v;
+    else if (k.startsWith('on') && typeof v === 'function') n.addEventListener(k.slice(2), v);
+    else if (v != null && v !== false) n.setAttribute(k, v);
+  }
+  for (const kid of [].concat(kids)) if (kid != null) n.append(kid.nodeType ? kid : String(kid));
+  return n;
+};
 
-  async function render(){
-    const { data:{ session } } = await db.auth.getSession();
-    const authed = !!session;
-    $('login').classList.toggle('hide', authed);
-    $('app').classList.toggle('hide', !authed);
-    if(authed){
-      let member = false;
-      try {
-        const { data } = await db.rpc('is_member');
-        member = !!data;
-      } catch(e){}
-      $('who').textContent = session.user.email
-        + (member ? '' : '  —  not on the allow-list (ask the owner to add you)');
+const USD = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+const USD2 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
+const money  = n => n == null ? '—' : USD.format(Number(n));
+const money2 = n => n == null ? '—' : USD2.format(Number(n));
+const dateStr = d => d || '—';
+const TODAY = new Date().toISOString().slice(0, 10);
+const daysBetween = (a, b) => Math.floor((new Date(b) - new Date(a)) / 86400000);
+
+function toast(text, isErr) {
+  const t = $('toast');
+  t.textContent = text;
+  t.className = 'toast show' + (isErr ? ' err' : '');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => (t.className = 'toast'), 2600);
+}
+
+/* ---------------- state ---------------- */
+const S = {
+  isOwner: false,
+  tab: 'overview',
+  meta: null, milestones: [], payments: [], invoices: [], links: [],
+  permits: [], decisions: [], changes: [], future: [], vendors: [], documents: [],
+};
+
+const TABLES = {
+  contract_meta: 'meta', milestones: 'milestones', payments: 'payments',
+  invoices: 'invoices', payment_invoice_links: 'links', permits: 'permits',
+  decision_log: 'decisions', change_requests: 'changes',
+  future_work_items: 'future', vendors: 'vendors', documents: 'documents',
+};
+
+async function loadAll() {
+  const results = await Promise.all(
+    Object.keys(TABLES).map(t => db.from(t).select('*'))
+  );
+  Object.keys(TABLES).forEach((t, i) => {
+    const { data, error } = results[i];
+    if (error) { console.warn(t, error.message); return; }
+    if (t === 'contract_meta') S.meta = data[0] || null;
+    else S[TABLES[t]] = data || [];
+  });
+  S.milestones.sort((a, b) => a.seq - b.seq);
+  S.permits.sort((a, b) => (a.seq ?? 99) - (b.seq ?? 99));
+  S.payments.sort((a, b) => (a.date < b.date ? 1 : -1));
+  S.invoices.sort((a, b) => (a.date_received < b.date_received ? 1 : -1));
+  S.decisions.sort((a, b) => (a.date < b.date ? 1 : -1));
+}
+
+/* ---------------- writes ---------------- */
+async function logActivity(entity, entity_id, action, detail) {
+  try { await db.from('activity_log').insert({ entity, entity_id: String(entity_id ?? ''), action, detail }); }
+  catch (e) { /* audit is best-effort */ }
+}
+async function write(kind, table, arg, values, entityId) {
+  let q;
+  if (kind === 'insert') q = db.from(table).insert(values).select();
+  else if (kind === 'update') q = db.from(table).update(values).match(arg).select();
+  else if (kind === 'delete') q = db.from(table).delete().match(arg);
+  const { data, error } = await q;
+  if (error) { toast(error.message, true); return null; }
+  await logActivity(table, entityId ?? (data && data[0] && (data[0].id ?? '')) ?? '', kind, values || arg);
+  toast('Saved.');
+  await loadAll();
+  render();
+  return data;
+}
+const upd = (table, match, values, id) => write('update', table, match, values, id);
+const ins = (table, values) => write('insert', table, null, values, null);
+const del = (table, match, id) => { if (confirm('Delete this row?')) return write('delete', table, match, null, id); };
+
+/* ---------------- deterministic math ---------------- */
+const contractPrice = () => Number(S.meta?.contract_price ?? 73500);
+
+const advancesFor = mid =>
+  S.payments.filter(p => p.milestone_id === mid && p.payment_type === 'material_advance')
+    .reduce((s, p) => s + Number(p.amount), 0);
+const disbursedFor = mid =>
+  S.payments.filter(p => p.milestone_id === mid && p.payment_type === 'milestone_disbursement')
+    .reduce((s, p) => s + Number(p.amount), 0);
+const amountDue = m => Number(m.contract_amount) - advancesFor(m.id);
+
+const paidToDate = () => S.payments.reduce((s, p) => s + Number(p.amount), 0);
+const pctComplete = () =>
+  S.milestones.filter(m => m.status === 'complete').reduce((s, m) => s + Number(m.contract_amount), 0)
+  / contractPrice() * 100;
+
+function scheduleStatus() {
+  const h1 = S.meta?.h1_disbursement_date;
+  const weeksAllowed = Number(S.meta?.weeks_allowed ?? 21);
+  const perWeek = Number(S.meta?.delay_penalty_per_week ?? 250);
+  const cap = Number(S.meta?.delay_penalty_cap ?? 7350);
+  if (!h1) return { started: false, weeksAllowed };
+  const weeksElapsed = Math.floor(daysBetween(h1, TODAY) / 7);
+  const overWeeks = Math.max(0, weeksElapsed - weeksAllowed);
+  const penalty = Math.min(overWeeks * perWeek, cap);
+  const deadline = new Date(h1); deadline.setDate(deadline.getDate() + weeksAllowed * 7);
+  return {
+    started: true, h1, weeksElapsed, weeksAllowed, overWeeks, penalty, cap, perWeek,
+    atCap: penalty >= cap && cap > 0,
+    deadline: deadline.toISOString().slice(0, 10),
+  };
+}
+
+const nextMilestone = () => S.milestones.find(m => m.status !== 'complete') || null;
+
+// permits (by seq) that gate a given milestone — from the contract approval gates
+const MILESTONE_PERMIT_GATES = {
+  H1: [9],            // CAR insurance policy
+  H2: [2, 3, 4],      // movimiento de tierra, planos plomería, permiso de construcción
+  H6: [10],           // HOA / Altos del María N-2 deferral
+};
+
+function attentionFlags() {
+  const flags = [];
+  const sc = scheduleStatus();
+
+  if (sc.started && sc.penalty > 0) {
+    flags.push({
+      level: sc.atCap ? 'red' : 'amber', big: true,
+      t: sc.atCap
+        ? `Delay penalty at the ${money(sc.cap)} cap — contract termination trigger (Art 4.1e)`
+        : `Potential delay penalty: ${money(sc.penalty)}`,
+      d: `${sc.weeksElapsed} weeks elapsed since H1 disbursement (${sc.h1}); ${sc.weeksAllowed} allowed. `
+        + `${sc.overWeeks} week(s) over × ${money(sc.perWeek)}/wk (unjustified delay, Art 7 / cap ${money(sc.cap)}).`,
+    });
+  }
+
+  // material-advance compliance (Art 2.5)
+  for (const p of S.payments.filter(p => p.payment_type === 'material_advance')) {
+    const label = `${money(p.amount)} advance ${p.advance_category ? '(' + p.advance_category + ')' : ''} ${p.date}`;
+    if (p.proof_of_purchase_deadline && p.proof_of_purchase_deadline < TODAY && !p.proof_of_purchase_received)
+      flags.push({ level: 'red', t: `Proof-of-purchase overdue — ${label}`,
+        d: `Paid vendor receipt was due ${p.proof_of_purchase_deadline} (10 business days after disbursement, Art 2.5). Not on file.` });
+    else if (!p.proof_of_purchase_received)
+      flags.push({ level: 'amber', t: `Proof-of-purchase pending — ${label}`,
+        d: `Paid vendor receipt not yet received${p.proof_of_purchase_deadline ? ` (due ${p.proof_of_purchase_deadline})` : ''}.` });
+    if (!p.proof_of_delivery_received)
+      flags.push({ level: 'amber', t: `Proof-of-delivery pending — ${label}`,
+        d: `No confirmation materials arrived at the lot. Required before the next milestone pays out (Art 2.5).` });
+  }
+
+  // next-milestone approval gate
+  const nm = nextMilestone();
+  if (nm) {
+    if (!nm.director_de_obra_approved)
+      flags.push({ level: 'amber', t: `${nm.id} — Director de Obra sign-off not recorded`,
+        d: `Every milestone disbursement needs the independent inspector's approval (Art 2.1).` });
+    if (nm.seq >= 2 && !nm.paz_y_salvo_on_file)
+      flags.push({ level: 'amber', t: `${nm.id} — Paz y Salvo not on file`,
+        d: `Worker-payment clearance required before disbursement from H2 onward (Art 2.2).` });
+    for (const pseq of (MILESTONE_PERMIT_GATES[nm.id] || [])) {
+      const pm = S.permits.find(p => p.seq === pseq);
+      if (pm && pm.status !== 'approved')
+        flags.push({ level: 'amber', t: `${nm.id} gate — "${pm.type}" not approved`,
+          d: `Status: ${pm.status.replace(/_/g, ' ')}. Required before ${nm.id}.` });
     }
   }
 
-  $('loginBtn').addEventListener('click', async ()=>{
-    const m = $('loginMsg'); m.textContent = 'Signing in…'; m.classList.remove('err');
-    const { error } = await db.auth.signInWithPassword({
-      email: $('email').value.trim(), password: $('password').value,
-    });
-    if(error){ m.textContent = error.message; m.classList.add('err'); return; }
-    m.textContent = ''; render();
-  });
-  $('logoutBtn').addEventListener('click', async ()=>{ await db.auth.signOut(); render(); });
-  db.auth.onAuthStateChange(()=>render());
+  // warranty clocks
+  if (S.meta?.final_delivery_date) {
+    const fd = S.meta.final_delivery_date;
+    const y = n => { const d = new Date(fd); d.setFullYear(d.getFullYear() + n); return d.toISOString().slice(0, 10); };
+    flags.push({ level: 'amber', t: `Warranty clocks running from final delivery ${fd}`,
+      d: `Labour/materials 2-yr expires ${y(S.meta.warranty_labor_years)} (Art 8.1); `
+        + `structural decennial 10-yr expires ${y(S.meta.warranty_structural_years)} (Art 8.2).` });
+  }
+
+  return flags;
+}
+
+/* ---------------- shared render bits ---------------- */
+const STATUS_PILL = {
+  not_started: 'dim', in_progress: 'amber', pending_inspection: 'amber',
+  complete: 'green', delayed: 'red',
+  submitted: 'amber', under_review: 'amber', approved: 'green',
+  unmatched: 'dim', partially_matched: 'amber', matched: 'green',
+  proposed: 'dim', rejected: 'red', superseded: 'dim',
+  idea: 'dim', quoted: 'amber', contracted: 'green', declined: 'dim',
+  pending: 'dim',
+};
+const pill = v => h('span', { class: 'pill ' + (STATUS_PILL[v] || 'dim'), text: (v || '').replace(/_/g, ' ') });
+
+function selectCell(value, options, onchange) {
+  if (!S.isOwner) return pill(value);
+  const sel = h('select', { onchange: e => onchange(e.target.value) });
+  for (const o of options) sel.append(h('option', { value: o, ...(o === value ? { selected: true } : {}) }, o.replace(/_/g, ' ')));
+  return sel;
+}
+function checkCell(value, onchange) {
+  const cb = h('input', { type: 'checkbox', ...(value ? { checked: true } : {}), disabled: !S.isOwner ? true : false,
+    onchange: e => onchange(e.target.checked) });
+  return cb;
+}
+function dateCell(value, onchange) {
+  if (!S.isOwner) return document.createTextNode(dateStr(value));
+  return h('input', { type: 'date', value: value || '', onchange: e => onchange(e.target.value || null) });
+}
+function textCellEdit(value, onchange, ph) {
+  if (!S.isOwner) return document.createTextNode(value || '—');
+  return h('input', { type: 'text', value: value || '', placeholder: ph || '', onchange: e => onchange(e.target.value || null) });
+}
+function ownerOnly(node) { return S.isOwner ? node : null; }
+
+/* ---------------- tabs ---------------- */
+const TABS = [
+  ['overview', 'Overview'], ['milestones', 'Milestones'], ['budget', 'Budget & payments'],
+  ['invoices', 'Invoices'], ['permits', 'Permits'], ['decisions', 'Decision log'],
+  ['changes', 'Change requests'], ['future', 'Future work'], ['vendors', 'Vendors'],
+  ['documents', 'Documents'],
+];
+
+function render() {
+  const nav = $('nav'); nav.innerHTML = '';
+  for (const [id, label] of TABS)
+    nav.append(h('button', { class: id === S.tab ? 'active' : '', onclick: () => { S.tab = id; render(); } }, label));
+  const v = $('view'); v.innerHTML = '';
+  ({
+    overview: viewOverview, milestones: viewMilestones, budget: viewBudget,
+    invoices: viewInvoices, permits: viewPermits, decisions: viewDecisions,
+    changes: viewChanges, future: viewFuture, vendors: viewVendors, documents: viewDocuments,
+  })[S.tab](v);
+  if (!S.isOwner) v.prepend(h('div', { class: 'ro-note', text: 'Read-only — this account is not the owner.' }));
+}
+
+/* ---------------- Overview ---------------- */
+function viewOverview(v) {
+  const pct = pctComplete();
+  const paid = paidToDate();
+  const sc = scheduleStatus();
+
+  v.append(h('div', { class: 'tiles' }, [
+    tile('Contract value', money(contractPrice())),
+    tile('% complete', pct.toFixed(1) + '%'),
+    tile('Paid to date', money(paid)),
+    tile('Remaining', money(contractPrice() - paid)),
+  ]));
+  const bar = h('div', { class: 'bar' }, h('i', { style: `width:${Math.min(100, pct).toFixed(1)}%` }));
+  v.append(bar);
+  v.append(h('div', { class: 'sub', text:
+    `${S.milestones.filter(m => m.status === 'complete').length} of ${S.milestones.length} milestones complete.` }));
+
+  // schedule
+  v.append(h('h2', {}, 'Schedule'));
+  if (!sc.started) {
+    v.append(h('div', { class: 'flag amber' }, [h('span', { class: 'dot' }),
+      h('div', {}, [h('div', { class: 't', text: '21-week contract clock has not started' }),
+        h('div', { class: 'd', text: 'Set the H1 disbursement date in Budget & payments once H1 is paid — that starts the clock and the delay-penalty math (Art 7.1).' })])]));
+  } else {
+    v.append(h('div', { class: 'row' }, [
+      tile('H1 disbursement', sc.h1),
+      tile('Weeks elapsed', `${sc.weeksElapsed} / ${sc.weeksAllowed}`),
+      tile('Contract deadline', sc.deadline),
+      tile('Delay penalty', money(sc.penalty)),
+    ]));
+  }
+
+  // attention
+  v.append(h('h2', {}, 'Attention'));
+  const flags = attentionFlags();
+  if (!flags.length) v.append(h('div', { class: 'placeholder', text: 'Nothing flagged. Schedule, advances and the next milestone gate all look clear.' }));
+  for (const f of flags)
+    v.append(h('div', { class: 'flag ' + f.level + (f.big ? ' big' : '') }, [
+      h('span', { class: 'dot' }),
+      h('div', {}, [h('div', { class: 't', text: f.t }), h('div', { class: 'd', text: f.d })]),
+    ]));
+
+  // recent decisions
+  v.append(h('h2', {}, 'Recent decisions'));
+  const recent = S.decisions.filter(d => d.confirmed).slice(0, 5);
+  if (!recent.length) v.append(h('div', { class: 'placeholder', text: 'No confirmed decisions logged yet.' }));
+  else v.append(tableFrom(['Date', 'Party', 'Summary', 'Resolves'],
+    recent.map(d => [d.date, d.party || '—', d.summary, d.resolves || '—'])));
+}
+const tile = (k, val) => h('div', { class: 'tile' }, [h('div', { class: 'k', text: k }), h('div', { class: 'v', text: val })]);
+
+function tableFrom(headers, rows) {
+  const t = h('table', {}, [
+    h('thead', {}, h('tr', {}, headers.map(x => h('th', {}, x)))),
+    h('tbody', {}, rows.map(r => h('tr', {}, r.map(c => h('td', {}, c == null ? '—' : c))))),
+  ]);
+  return h('div', { class: 'tbl-scroll' }, t);
+}
+
+/* ---------------- Milestones ---------------- */
+function viewMilestones(v) {
+  v.append(h('h2', {}, 'Milestones (H1–H8)'));
+  v.append(h('div', { class: 'sub', text: 'Schedule and split from the signed contract (Art 2.1). Amount due nets material advances against the milestone total.' }));
+
+  const body = h('tbody');
+  for (const m of S.milestones) {
+    const tr = h('tr', {}, [
+      h('td', {}, m.id),
+      h('td', {}, m.name),
+      h('td', { class: 'num' }, Number(m.pct_of_contract) + '%'),
+      h('td', { class: 'num' }, money(m.contract_amount)),
+      h('td', { class: 'num' }, money(amountDue(m))),
+      h('td', {}, selectCell(m.status, ['not_started', 'in_progress', 'pending_inspection', 'complete', 'delayed'],
+        val => upd('milestones', { id: m.id }, { status: val, updated_at: new Date().toISOString() }, m.id))),
+      h('td', {}, dateCell(m.planned_date, val => upd('milestones', { id: m.id }, { planned_date: val }, m.id))),
+      h('td', {}, dateCell(m.actual_date, val => upd('milestones', { id: m.id }, { actual_date: val }, m.id))),
+      h('td', {}, checkCell(m.paz_y_salvo_on_file, val => upd('milestones', { id: m.id }, { paz_y_salvo_on_file: val }, m.id))),
+      h('td', {}, checkCell(m.director_de_obra_approved, val => upd('milestones', { id: m.id }, { director_de_obra_approved: val }, m.id))),
+    ]);
+    body.append(tr);
+    const detail = h('tr', { class: 'sub-row' }, h('td', { colspan: 10 }, [
+      h('div', {}, [h('strong', {}, 'Approval gate: '), m.approval_gate_notes || '—']),
+      h('div', { style: 'margin-top:6px' }, [
+        h('strong', {}, 'Notes: '),
+        S.isOwner
+          ? h('input', { type: 'text', value: m.notes || '', placeholder: 'Director de Obra name / date, inspection refs…',
+              onchange: e => upd('milestones', { id: m.id }, { notes: e.target.value || null }, m.id) })
+          : (m.notes || '—'),
+      ]),
+      linkedPaymentsMini(m.id),
+    ]));
+    body.append(detail);
+  }
+  v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
+    h('thead', {}, h('tr', {}, ['#', 'Milestone', '%', 'Contract', 'Due (net adv.)', 'Status', 'Planned', 'Actual', 'Paz y Salvo', 'Dir. de Obra'].map(x => h('th', { class: /%|Contract|Due/.test(x) ? 'num' : '' }, x)))),
+    body,
+  ])));
+}
+function linkedPaymentsMini(mid) {
+  const ps = S.payments.filter(p => p.milestone_id === mid);
+  if (!ps.length) return h('div', { class: 'muted-cell', style: 'margin-top:6px', text: 'No payments linked.' });
+  return h('div', { style: 'margin-top:6px' }, [
+    h('strong', {}, 'Payments: '),
+    ps.map(p => `${p.date} ${money(p.amount)} (${p.payment_type === 'material_advance' ? 'advance' : 'disbursement'})`).join('  ·  '),
+  ]);
+}
+
+/* ---------------- Budget & payments ---------------- */
+function viewBudget(v) {
+  // contract meta editor
+  v.append(h('h2', {}, 'Contract'));
+  const m = S.meta || {};
+  const metaGrid = h('div', { class: 'inline-form' }, [
+    metaField('H1 disbursement date', 'h1_disbursement_date', 'date', m.h1_disbursement_date,
+      'Starts the 21-week clock and the penalty math (Art 7.1).'),
+    metaField('Final delivery date', 'final_delivery_date', 'date', m.final_delivery_date,
+      'Starts both warranty clocks (Art 8).'),
+    metaField('Weeks allowed', 'weeks_allowed', 'number', m.weeks_allowed),
+    metaField('Delay penalty / week', 'delay_penalty_per_week', 'number', m.delay_penalty_per_week),
+    metaField('Delay penalty cap', 'delay_penalty_cap', 'number', m.delay_penalty_cap),
+  ]);
+  v.append(metaGrid);
+
+  // budget rollup
+  v.append(h('h2', {}, 'Budget'));
+  const paid = paidToDate();
+  v.append(h('div', { class: 'tiles' }, [
+    tile('Contracted', money(contractPrice())),
+    tile('Paid to date', money(paid)),
+    tile('Remaining', money(contractPrice() - paid)),
+    tile('Advances outstanding vs milestones', money(S.milestones.reduce((s, mm) => s + advancesFor(mm.id), 0))),
+  ]));
+  v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
+    h('thead', {}, h('tr', {}, ['#', 'Milestone', 'Contract', 'Advances', 'Disbursed', 'Due at completion'].map(x => h('th', { class: x === '#' || x === 'Milestone' ? '' : 'num' }, x)))),
+    h('tbody', {}, S.milestones.map(mm => h('tr', {}, [
+      h('td', {}, mm.id), h('td', {}, mm.name),
+      h('td', { class: 'num' }, money(mm.contract_amount)),
+      h('td', { class: 'num' }, money(advancesFor(mm.id))),
+      h('td', { class: 'num' }, money(disbursedFor(mm.id))),
+      h('td', { class: 'num' }, money(amountDue(mm))),
+    ]))),
+  ])));
+
+  // payments
+  v.append(h('div', { class: 'spread' }, [h('h2', {}, 'Payments'), ownerOnly(h('button', { class: 'sm', onclick: () => togglePaymentForm(v) }, '+ Add payment'))]));
+  v.append(h('div', { id: 'paymentForm' }));
+  v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
+    h('thead', {}, h('tr', {}, ['Date', 'Amount', 'Type', 'Milestone', 'Recipient', 'Category', 'PoP', 'PoP deadline', 'PoD', ''].map(x => h('th', { class: x === 'Amount' ? 'num' : '' }, x)))),
+    h('tbody', {}, S.payments.map(p => paymentRow(p))),
+  ])));
+  v.append(h('div', { class: 'sub', text: 'PoP = proof of purchase (paid vendor receipt, due 10 business days after a material advance). PoD = proof of delivery to the lot. Both gate the next milestone payout (Art 2.5).' }));
+}
+function metaField(label, key, type, value, hint) {
+  const inp = h('input', { type, value: value ?? '', disabled: !S.isOwner,
+    onchange: e => upd('contract_meta', { id: 'current' }, { [key]: (type === 'number' ? Number(e.target.value) : (e.target.value || null)), updated_at: new Date().toISOString() }, 'current') });
+  return h('div', {}, [h('label', {}, label), inp, hint ? h('div', { class: 'sub', style: 'font-size:11px;margin-top:3px', text: hint }) : null]);
+}
+function paymentRow(p) {
+  const compliance = p.payment_type === 'material_advance'
+    ? (p.proof_of_purchase_deadline && p.proof_of_purchase_deadline < TODAY && !p.proof_of_purchase_received ? 'red'
+      : (!p.proof_of_purchase_received || !p.proof_of_delivery_received ? 'amber' : 'green'))
+    : null;
+  return h('tr', {}, [
+    h('td', {}, p.date),
+    h('td', { class: 'num' }, money2(p.amount)),
+    h('td', {}, p.payment_type === 'material_advance' ? 'advance' : 'disbursement'),
+    h('td', {}, p.milestone_id || '—'),
+    h('td', {}, p.recipient || '—'),
+    h('td', {}, p.advance_category || '—'),
+    h('td', {}, p.payment_type === 'material_advance'
+      ? checkCell(p.proof_of_purchase_received, val => upd('payments', { id: p.id }, { proof_of_purchase_received: val }, p.id))
+      : '—'),
+    h('td', {}, p.payment_type === 'material_advance'
+      ? dateCell(p.proof_of_purchase_deadline, val => upd('payments', { id: p.id }, { proof_of_purchase_deadline: val }, p.id))
+      : '—'),
+    h('td', {}, p.payment_type === 'material_advance'
+      ? checkCell(p.proof_of_delivery_received, val => upd('payments', { id: p.id }, { proof_of_delivery_received: val }, p.id))
+      : '—'),
+    h('td', {}, [
+      compliance ? h('span', { class: 'pill ' + compliance, text: compliance === 'green' ? 'ok' : 'check' }) : null,
+      ownerOnly(h('button', { class: 'ghost sm', style: 'margin-left:6px', onclick: () => del('payments', { id: p.id }, p.id) }, '×')),
+    ]),
+  ]);
+}
+function togglePaymentForm(v) {
+  const host = $('paymentForm');
+  if (host.children.length) { host.innerHTML = ''; return; }
+  const f = {};
+  const bizDeadline = d => { // +10 business days
+    const x = new Date(d); let n = 10;
+    while (n > 0) { x.setDate(x.getDate() + 1); if (x.getDay() !== 0 && x.getDay() !== 6) n--; }
+    return x.toISOString().slice(0, 10);
+  };
+  const form = h('div', { class: 'inline-form' }, [
+    field('Date', h('input', { type: 'date', value: TODAY, onchange: e => f.date = e.target.value })),
+    field('Amount (USD)', h('input', { type: 'number', step: '0.01', onchange: e => f.amount = Number(e.target.value) })),
+    field('Type', h('select', { onchange: e => { f.payment_type = e.target.value; render(); } }, [
+      h('option', { value: 'milestone_disbursement' }, 'milestone disbursement'),
+      h('option', { value: 'material_advance' }, 'material advance'),
+    ])),
+    field('Milestone', h('select', { onchange: e => f.milestone_id = e.target.value || null }, [
+      h('option', { value: '' }, '—'), ...S.milestones.map(m => h('option', { value: m.id }, `${m.id} ${m.name}`)),
+    ])),
+    field('Recipient', h('input', { type: 'text', onchange: e => f.recipient = e.target.value || null })),
+    field('Method', h('input', { type: 'text', placeholder: 'wire / cheque…', onchange: e => f.method = e.target.value || null })),
+    field('Advance category', h('select', { onchange: e => f.advance_category = e.target.value || null }, [
+      h('option', { value: '' }, '— (advances only)'),
+      ...['steel', 'huurre_panels', 'roof_structure', 'electrical_cable'].map(c => h('option', { value: c }, c)),
+    ])),
+    field('PoP deadline', h('input', { type: 'date', id: 'popDeadline', onchange: e => f.proof_of_purchase_deadline = e.target.value || null })),
+    h('div', { class: 'full' }, [h('label', {}, 'Notes'), h('textarea', { onchange: e => f.notes = e.target.value || null })]),
+    h('div', { class: 'full row' }, [
+      h('button', { onclick: async () => {
+        if (!f.date || !f.amount || !f.payment_type) { toast('Date, amount and type are required.', true); return; }
+        await ins('payments', f);
+      } }, 'Save payment'),
+      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, 'Cancel'),
+      h('span', { class: 'sub', text: 'For a material advance, set the PoP deadline to 10 business days after the disbursement date.' }),
+    ]),
+  ]);
+  host.append(form);
+  // prefill PoP deadline suggestion
+  setTimeout(() => { const d = $('popDeadline'); if (d) d.value = bizDeadline(TODAY); f.proof_of_purchase_deadline = bizDeadline(TODAY); }, 0);
+}
+const field = (label, node) => h('div', {}, [h('label', {}, label), node]);
+
+/* ---------------- Invoices ---------------- */
+function viewInvoices(v) {
+  v.append(h('div', { class: 'spread' }, [h('h2', {}, 'Invoices received'), ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('invoiceForm', invoiceForm) }, '+ Add invoice'))]));
+  v.append(h('div', { id: 'invoiceForm' }));
+  v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
+    h('thead', {}, h('tr', {}, ['Received', 'Vendor', 'Amount', 'Milestone', 'Applied', 'Status', 'Notes', ''].map(x => h('th', { class: x === 'Amount' || x === 'Applied' ? 'num' : '' }, x)))),
+    h('tbody', {}, S.invoices.map(inv => {
+      const applied = S.links.filter(l => l.invoice_id === inv.id).reduce((s, l) => s + Number(l.amount_applied), 0);
+      return h('tr', {}, [
+        h('td', {}, inv.date_received),
+        h('td', {}, inv.vendor),
+        h('td', { class: 'num' }, money2(inv.amount)),
+        h('td', {}, inv.milestone_id || '—'),
+        h('td', { class: 'num' }, money2(applied)),
+        h('td', {}, selectCell(inv.status, ['unmatched', 'partially_matched', 'matched'],
+          val => upd('invoices', { id: inv.id }, { status: val }, inv.id))),
+        h('td', {}, inv.notes || '—'),
+        h('td', {}, ownerOnly(h('button', { class: 'ghost sm', onclick: () => del('invoices', { id: inv.id }, inv.id) }, '×'))),
+      ]);
+    })),
+  ])));
+
+  // linking
+  v.append(h('h3', {}, 'Payment ↔ invoice links (many-to-many)'));
+  v.append(h('div', { class: 'sub', text: 'Matching is rarely 1:1 — one payment can cover several invoices, one invoice can be paid across several payments.' }));
+  if (S.isOwner) v.append(linkForm());
+  v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
+    h('thead', {}, h('tr', {}, ['Payment', 'Invoice', 'Applied', ''].map(x => h('th', { class: x === 'Applied' ? 'num' : '' }, x)))),
+    h('tbody', {}, S.links.map(l => {
+      const p = S.payments.find(x => x.id === l.payment_id), inv = S.invoices.find(x => x.id === l.invoice_id);
+      return h('tr', {}, [
+        h('td', {}, p ? `${p.date} ${money(p.amount)}` : l.payment_id),
+        h('td', {}, inv ? `${inv.vendor} ${money(inv.amount)}` : l.invoice_id),
+        h('td', { class: 'num' }, money2(l.amount_applied)),
+        h('td', {}, ownerOnly(h('button', { class: 'ghost sm', onclick: () => del('payment_invoice_links', { payment_id: l.payment_id, invoice_id: l.invoice_id }, l.invoice_id) }, '×'))),
+      ]);
+    })),
+  ])));
+}
+function invoiceForm(host) {
+  const f = { status: 'unmatched' };
+  host.append(h('div', { class: 'inline-form' }, [
+    field('Date received', h('input', { type: 'date', value: TODAY, onchange: e => f.date_received = e.target.value })),
+    field('Vendor', h('input', { type: 'text', onchange: e => f.vendor = e.target.value })),
+    field('Amount (USD)', h('input', { type: 'number', step: '0.01', onchange: e => f.amount = Number(e.target.value) })),
+    field('Milestone', h('select', { onchange: e => f.milestone_id = e.target.value || null }, [
+      h('option', { value: '' }, '—'), ...S.milestones.map(m => h('option', { value: m.id }, m.id)),
+    ])),
+    h('div', { class: 'full' }, [h('label', {}, 'Notes'), h('textarea', { onchange: e => f.notes = e.target.value || null })]),
+    h('div', { class: 'full row' }, [
+      h('button', { onclick: async () => {
+        if (!f.date_received || !f.vendor || !f.amount) { toast('Date, vendor and amount are required.', true); return; }
+        await ins('invoices', f);
+      } }, 'Save invoice'),
+      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, 'Cancel'),
+    ]),
+  ]));
+}
+function linkForm() {
+  const f = {};
+  return h('div', { class: 'inline-form' }, [
+    field('Payment', h('select', { onchange: e => f.payment_id = e.target.value }, [
+      h('option', { value: '' }, '—'), ...S.payments.map(p => h('option', { value: p.id }, `${p.date} ${money(p.amount)} ${p.recipient || ''}`)),
+    ])),
+    field('Invoice', h('select', { onchange: e => f.invoice_id = e.target.value }, [
+      h('option', { value: '' }, '—'), ...S.invoices.map(i => h('option', { value: i.id }, `${i.vendor} ${money(i.amount)}`)),
+    ])),
+    field('Amount applied', h('input', { type: 'number', step: '0.01', onchange: e => f.amount_applied = Number(e.target.value) })),
+    h('div', { class: 'row' }, h('button', { onclick: async () => {
+      if (!f.payment_id || !f.invoice_id || !f.amount_applied) { toast('All three fields are required.', true); return; }
+      await ins('payment_invoice_links', f);
+    } }, 'Link')),
+  ]);
+}
+
+/* ---------------- Permits ---------------- */
+function viewPermits(v) {
+  v.append(h('h2', {}, 'Permits & hard gates'));
+  v.append(h('div', { class: 'sub', text: 'Status + document tracking only. CAR insurance is listed here because it is a hard gate before H1 (Art 5.3).' }));
+  v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
+    h('thead', {}, h('tr', {}, ['#', 'Permit / approval', 'Status', 'Completed', 'Responsible', 'Notes'].map(x => h('th', {}, x)))),
+    h('tbody', {}, S.permits.map(p => h('tr', {}, [
+      h('td', {}, p.seq ?? '—'),
+      h('td', {}, p.type),
+      h('td', {}, selectCell(p.status, ['not_started', 'submitted', 'under_review', 'approved'],
+        val => upd('permits', { id: p.id }, { status: val, updated_at: new Date().toISOString() }, p.id))),
+      h('td', {}, dateCell(p.completion_date, val => upd('permits', { id: p.id }, { completion_date: val }, p.id))),
+      h('td', {}, textCellEdit(p.responsible_party, val => upd('permits', { id: p.id }, { responsible_party: val }, p.id), 'contractor / owner')),
+      h('td', {}, p.notes || '—'),
+    ]))),
+  ])));
+}
+
+/* ---------------- Decision log ---------------- */
+function viewDecisions(v) {
+  v.append(h('div', { class: 'spread' }, [h('h2', {}, 'Decision / change log'), ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('decisionForm', decisionForm) }, '+ Add entry'))]));
+  v.append(h('div', { class: 'sub', text: 'Anything from email / WhatsApp / paper that changes scope, price or schedule. Manual entry for v1. "Confirmed" is the "it does not count until you say so" gate.' }));
+  v.append(h('div', { id: 'decisionForm' }));
+  const unconfirmed = S.decisions.filter(d => !d.confirmed);
+  if (unconfirmed.length) {
+    v.append(h('h3', {}, `Awaiting confirmation (${unconfirmed.length})`));
+    v.append(decisionTable(unconfirmed));
+  }
+  v.append(h('h3', {}, 'Confirmed'));
+  v.append(decisionTable(S.decisions.filter(d => d.confirmed)));
+}
+function decisionTable(rows) {
+  if (!rows.length) return h('div', { class: 'placeholder', text: 'Nothing here.' });
+  return h('div', { class: 'tbl-scroll' }, h('table', {}, [
+    h('thead', {}, h('tr', {}, ['Date', 'Source', 'Party', 'Summary', 'Resolves', 'Confirmed', ''].map(x => h('th', {}, x)))),
+    h('tbody', {}, rows.map(d => h('tr', {}, [
+      h('td', {}, d.date),
+      h('td', {}, d.source),
+      h('td', {}, d.party || '—'),
+      h('td', {}, d.summary),
+      h('td', {}, d.resolves || '—'),
+      h('td', {}, checkCell(d.confirmed, val => upd('decision_log', { id: d.id }, { confirmed: val }, d.id))),
+      h('td', {}, ownerOnly(h('button', { class: 'ghost sm', onclick: () => del('decision_log', { id: d.id }, d.id) }, '×'))),
+    ]))),
+  ]));
+}
+function decisionForm(host) {
+  const f = { source: 'whatsapp', confirmed: false };
+  host.append(h('div', { class: 'inline-form' }, [
+    field('Date', h('input', { type: 'date', value: TODAY, onchange: e => f.date = e.target.value })),
+    field('Source', h('select', { onchange: e => f.source = e.target.value }, ['whatsapp', 'email', 'manual', 'other'].map(s => h('option', { value: s }, s)))),
+    field('Party', h('input', { type: 'text', placeholder: 'who', onchange: e => f.party = e.target.value || null })),
+    field('Resolves', h('input', { type: 'text', placeholder: 'Art / scope item', onchange: e => f.resolves = e.target.value || null })),
+    h('div', { class: 'full' }, [h('label', {}, 'Summary / quoted text'), h('textarea', { onchange: e => f.summary = e.target.value })]),
+    h('div', { class: 'full row' }, [
+      h('label', { style: 'margin:0' }, [h('input', { type: 'checkbox', onchange: e => f.confirmed = e.target.checked }), ' confirmed']),
+      h('button', { onclick: async () => {
+        if (!f.date || !f.summary) { toast('Date and summary are required.', true); return; }
+        await ins('decision_log', f);
+      } }, 'Save entry'),
+      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, 'Cancel'),
+    ]),
+  ]));
+}
+
+/* ---------------- Change requests ---------------- */
+function viewChanges(v) {
+  v.append(h('div', { class: 'spread' }, [h('h2', {}, 'Change requests'), ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('changeForm', changeForm) }, '+ New request'))]));
+  v.append(h('div', { class: 'sub', text: 'Modifications to the live Bripo contract, two-party sign-off. No automatic budget/milestone recalculation in v1 — log it flat.' }));
+  v.append(h('div', { id: 'changeForm' }));
+  v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
+    h('thead', {}, h('tr', {}, ['Submitted', 'Description', 'Cost', 'Sched (d)', 'Owner', 'Developer', 'Evidence', 'Status', ''].map(x => h('th', { class: x === 'Cost' ? 'num' : '' }, x)))),
+    h('tbody', {}, S.changes.map(c => h('tr', {}, [
+      h('td', {}, c.date_submitted),
+      h('td', {}, c.description),
+      h('td', { class: 'num' }, c.cost_impact == null ? '—' : money2(c.cost_impact)),
+      h('td', { class: 'num' }, c.schedule_impact_days ?? '—'),
+      h('td', {}, selectCell(c.owner_approval, ['pending', 'approved', 'rejected'], val => upd('change_requests', { id: c.id }, { owner_approval: val }, c.id))),
+      h('td', {}, selectCell(c.developer_approval, ['pending', 'approved', 'rejected'], val => upd('change_requests', { id: c.id }, { developer_approval: val }, c.id))),
+      h('td', {}, textCellEdit(c.developer_approval_evidence, val => upd('change_requests', { id: c.id }, { developer_approval_evidence: val }, c.id), 'email confirmation…')),
+      h('td', {}, selectCell(c.status, ['proposed', 'approved', 'rejected', 'superseded'], val => upd('change_requests', { id: c.id }, { status: val }, c.id))),
+      h('td', {}, ownerOnly(h('button', { class: 'ghost sm', onclick: () => del('change_requests', { id: c.id }, c.id) }, '×'))),
+    ]))),
+  ])));
+}
+function changeForm(host) {
+  const f = {};
+  host.append(h('div', { class: 'inline-form' }, [
+    h('div', { class: 'full' }, [h('label', {}, 'Description'), h('textarea', { onchange: e => f.description = e.target.value })]),
+    field('Cost impact (USD)', h('input', { type: 'number', step: '0.01', onchange: e => f.cost_impact = e.target.value === '' ? null : Number(e.target.value) })),
+    field('Schedule impact (days)', h('input', { type: 'number', onchange: e => f.schedule_impact_days = e.target.value === '' ? null : Number(e.target.value) })),
+    h('div', { class: 'row' }, [
+      h('button', { onclick: async () => { if (!f.description) { toast('Description is required.', true); return; } await ins('change_requests', f); } }, 'Save request'),
+      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, 'Cancel'),
+    ]),
+  ]));
+}
+
+/* ---------------- Future work ---------------- */
+function viewFuture(v) {
+  v.append(h('div', { class: 'spread' }, [h('h2', {}, 'Future / independent work items'), ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('futureForm', futureForm) }, '+ Add item'))]));
+  v.append(h('div', { class: 'sub', text: 'Scope you are considering that is NOT a modification to the signed Bripo contract — could become its own contract, possibly a different vendor. Not routed through change-request sign-off.' }));
+  v.append(h('div', { id: 'futureForm' }));
+  v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
+    h('thead', {}, h('tr', {}, ['Description', 'Est. cost', 'Status', 'Potential vendor', 'Time-sensitive', ''].map(x => h('th', { class: x === 'Est. cost' ? 'num' : '' }, x)))),
+    h('tbody', {}, S.future.map(it => h('tr', {}, [
+      h('td', {}, it.description),
+      h('td', { class: 'num' }, it.estimated_cost == null ? '—' : money2(it.estimated_cost)),
+      h('td', {}, selectCell(it.status, ['idea', 'quoted', 'contracted', 'declined'], val => upd('future_work_items', { id: it.id }, { status: val }, it.id))),
+      h('td', {}, textCellEdit(it.potential_vendor, val => upd('future_work_items', { id: it.id }, { potential_vendor: val }, it.id))),
+      h('td', {}, it.time_sensitive_note || '—'),
+      h('td', {}, ownerOnly(h('button', { class: 'ghost sm', onclick: () => del('future_work_items', { id: it.id }, it.id) }, '×'))),
+    ]))),
+  ])));
+}
+function futureForm(host) {
+  const f = { status: 'idea' };
+  host.append(h('div', { class: 'inline-form' }, [
+    h('div', { class: 'full' }, [h('label', {}, 'Description'), h('textarea', { onchange: e => f.description = e.target.value })]),
+    field('Estimated cost (USD)', h('input', { type: 'number', step: '0.01', onchange: e => f.estimated_cost = e.target.value === '' ? null : Number(e.target.value) })),
+    field('Potential vendor', h('input', { type: 'text', onchange: e => f.potential_vendor = e.target.value || null })),
+    h('div', { class: 'full' }, [h('label', {}, 'Time-sensitive note'), h('input', { type: 'text', onchange: e => f.time_sensitive_note = e.target.value || null })]),
+    h('div', { class: 'row' }, [
+      h('button', { onclick: async () => { if (!f.description) { toast('Description is required.', true); return; } await ins('future_work_items', f); } }, 'Save item'),
+      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, 'Cancel'),
+    ]),
+  ]));
+}
+
+/* ---------------- Vendors ---------------- */
+function viewVendors(v) {
+  v.append(h('div', { class: 'spread' }, [h('h2', {}, 'Vendors & contacts'), ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('vendorForm', vendorForm) }, '+ Add vendor'))]));
+  v.append(h('div', { id: 'vendorForm' }));
+  v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
+    h('thead', {}, h('tr', {}, ['Name', 'Role', 'Phone', 'Email', 'Notes', ''].map(x => h('th', {}, x)))),
+    h('tbody', {}, S.vendors.map(vn => h('tr', {}, [
+      h('td', {}, textCellEdit(vn.name, val => upd('vendors', { id: vn.id }, { name: val }, vn.id))),
+      h('td', {}, textCellEdit(vn.role, val => upd('vendors', { id: vn.id }, { role: val }, vn.id))),
+      h('td', {}, textCellEdit(vn.phone, val => upd('vendors', { id: vn.id }, { phone: val }, vn.id))),
+      h('td', {}, textCellEdit(vn.email, val => upd('vendors', { id: vn.id }, { email: val }, vn.id))),
+      h('td', {}, textCellEdit(vn.notes, val => upd('vendors', { id: vn.id }, { notes: val }, vn.id))),
+      h('td', {}, ownerOnly(h('button', { class: 'ghost sm', onclick: () => del('vendors', { id: vn.id }, vn.id) }, '×'))),
+    ]))),
+  ])));
+}
+function vendorForm(host) {
+  const f = {};
+  host.append(h('div', { class: 'inline-form' }, [
+    field('Name', h('input', { type: 'text', onchange: e => f.name = e.target.value })),
+    field('Role', h('input', { type: 'text', onchange: e => f.role = e.target.value || null })),
+    field('Phone', h('input', { type: 'text', onchange: e => f.phone = e.target.value || null })),
+    field('Email', h('input', { type: 'text', onchange: e => f.email = e.target.value || null })),
+    h('div', { class: 'full' }, [h('label', {}, 'Notes'), h('textarea', { onchange: e => f.notes = e.target.value || null })]),
+    h('div', { class: 'row' }, [
+      h('button', { onclick: async () => { if (!f.name) { toast('Name is required.', true); return; } await ins('vendors', f); } }, 'Save vendor'),
+      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, 'Cancel'),
+    ]),
+  ]));
+}
+
+/* ---------------- Documents ---------------- */
+function viewDocuments(v) {
+  v.append(h('h2', {}, 'Documents'));
+  v.append(h('div', { class: 'sub', text: 'Metadata index for files stored in the private "documents" Supabase Storage bucket (same RLS). Never store a public link. No cédula / RUC numbers.' }));
+  if (S.isOwner) {
+    const f = {};
+    v.append(h('div', { class: 'inline-form' }, [
+      field('File', h('input', { type: 'file', onchange: e => f.file = e.target.files[0] })),
+      field('Linked to', h('select', { onchange: e => f.linked_entity_type = e.target.value || null }, [
+        h('option', { value: '' }, '—'), ...['milestone', 'permit', 'payment', 'invoice', 'vendor', 'change_request'].map(t => h('option', { value: t }, t)),
+      ])),
+      field('Entity id', h('input', { type: 'text', placeholder: 'e.g. H2', onchange: e => f.linked_entity_id = e.target.value || null })),
+      h('div', { class: 'row' }, h('button', { onclick: () => uploadDoc(f) }, 'Upload')),
+    ]));
+  }
+  v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
+    h('thead', {}, h('tr', {}, ['Filename', 'Linked', 'Uploaded', ''].map(x => h('th', {}, x)))),
+    h('tbody', {}, S.documents.map(d => h('tr', {}, [
+      h('td', {}, S.isOwner ? h('a', { href: '#', onclick: async ev => { ev.preventDefault(); await openDoc(d); } }, d.filename) : d.filename),
+      h('td', {}, d.linked_entity_type ? `${d.linked_entity_type} ${d.linked_entity_id || ''}` : '—'),
+      h('td', {}, (d.uploaded_at || '').slice(0, 10)),
+      h('td', {}, ownerOnly(h('button', { class: 'ghost sm', onclick: () => del('documents', { id: d.id }, d.id) }, '×'))),
+    ]))),
+  ])));
+}
+async function uploadDoc(f) {
+  if (!f.file) { toast('Choose a file.', true); return; }
+  const path = `${Date.now()}_${f.file.name}`.replace(/[^\w.\-]/g, '_');
+  const { error } = await db.storage.from('documents').upload(path, f.file);
+  if (error) { toast('Upload: ' + error.message, true); return; }
+  await ins('documents', { filename: f.file.name, storage_path: path, linked_entity_type: f.linked_entity_type, linked_entity_id: f.linked_entity_id });
+}
+async function openDoc(d) {
+  const { data, error } = await db.storage.from('documents').createSignedUrl(d.storage_path, 120);
+  if (error) { toast(error.message, true); return; }
+  window.open(data.signedUrl, '_blank');
+}
+
+/* ---------------- form toggle helper ---------------- */
+function toggleForm(hostId, builder) {
+  const host = $(hostId);
+  if (host.children.length) { host.innerHTML = ''; return; }
+  builder(host);
+}
+
+/* ---------------- auth ---------------- */
+async function refresh() {
+  const { data: { session } } = await db.auth.getSession();
+  const authed = !!session;
+  $('login').classList.toggle('hide', authed);
+  $('app').classList.toggle('hide', !authed);
+  $('sessionBox').classList.toggle('hide', !authed);
+  if (!authed) return;
+
+  let member = false;
+  try { const { data } = await db.rpc('is_member'); member = !!data; } catch (e) {}
+  try { const { data } = await db.rpc('is_owner'); S.isOwner = !!data; } catch (e) { S.isOwner = false; }
+  $('who').textContent = session.user.email + (member ? (S.isOwner ? ' · owner' : ' · viewer') : ' · not on the allow-list');
+
+  if (!member) {
+    $('view').innerHTML = '';
+    $('nav').innerHTML = '';
+    $('view').append(h('div', { class: 'placeholder', html:
+      `This account (<code>${session.user.email}</code>) is authenticated but not on the allow-list, so no data is visible.<br>`
+      + `The owner adds it with:<br><code>insert into app_users (user_id, email, role) values ('${session.user.id}', '${session.user.email}', 'owner');</code>` }));
+    return;
+  }
+  await loadAll();
   render();
+}
+
+$('loginBtn').addEventListener('click', async () => {
+  const m = $('loginMsg'); m.textContent = 'Signing in…'; m.classList.remove('err');
+  const { error } = await db.auth.signInWithPassword({ email: $('email').value.trim(), password: $('password').value });
+  if (error) { m.textContent = error.message; m.classList.add('err'); return; }
+  m.textContent = '';
+});
+$('signupBtn').addEventListener('click', async () => {
+  const m = $('loginMsg'); m.textContent = 'Creating account…'; m.classList.remove('err');
+  const { error } = await db.auth.signUp({ email: $('email').value.trim(), password: $('password').value });
+  if (error) { m.textContent = error.message; m.classList.add('err'); return; }
+  m.textContent = 'Account created. If email confirmation is on, confirm then sign in. Then the owner adds you to the allow-list.';
+});
+$('logoutBtn').addEventListener('click', async () => { await db.auth.signOut(); location.reload(); });
+db.auth.onAuthStateChange(() => refresh());
+refresh();
 </script>
 </body>
 </html>
