@@ -41,10 +41,11 @@ static dashboard (app/index.html, GitHub Pages)  ◄──  reads live via supab
   money, milestones, permits — it doesn't need identity numbers. The contract PDF,
   if stored, goes in a private Supabase Storage bucket under the same RLS, never
   a public link.
-- The login screen has a **Create account** button (Supabase Auth needs the
-  owner to self-register once). Disable "Allow new users to sign up" in the
-  Supabase dashboard right after first-run setup. A signup with no `app_users`
-  row sees nothing — RLS is the boundary, not the button.
+- **No signup UI.** The login screen is sign-in only. Accounts are created by
+  the owner in the Supabase dashboard (Authentication → Add user) and then
+  allow-listed in `app_users`. Keep "Allow new users to sign up" disabled in
+  Supabase Auth settings. An account with no `app_users` row sees nothing — RLS
+  is the boundary.
 
 ## Data model
 
@@ -73,7 +74,7 @@ Helpers: `public.is_member()`, `public.is_owner()`, `public.schema_catalog()`.
 
 Single-file vanilla-JS dashboard, `supabase-js` from CDN, 10 tabs (Overview,
 Milestones, Budget & payments, Invoices, Permits, Decision log, Change requests,
-Future work, Vendors, Documents). Login/signup shell → `is_member()` gate →
+Future work, Vendors, Documents). Sign-in shell → `is_member()` gate →
 `is_owner()` decides read-only vs editable. Every write goes through RLS and
 also appends to `activity_log`. **EN / ES** via the `t()` helper + `I18N` dict +
 the header toggle (persisted to `localStorage['bripo_lang']`); user-entered data
@@ -113,22 +114,21 @@ milestone-slipping (in-progress past planned date) and bookkeeping-drift
 
 ## First-run setup (do once) — NOT yet done as of v1 handoff
 
-1. Open the deployed dashboard → **Create account** with the owner's email +
-   password. If email confirmation is on, confirm, then sign in.
-2. In the Supabase dashboard → Authentication → Providers/Settings, **turn off
-   "Allow new users to sign up"** now that the owner's account exists. (RLS
-   already means a rogue signup sees nothing, but close the door anyway.)
-3. Get the owner's `auth.uid()` and insert the allow-list row **via MCP
-   `execute_sql`** (service role, bypasses RLS):
-   `insert into app_users (user_id, email, role) values ('<uid>', '<email>', 'owner');`
-   (Owner = Brian Parisien / brianparisien@gmail.com. No other accounts in v1.)
-4. Set `contract_meta.h1_disbursement_date` (Budget & payments tab) once H1 is
+1. Supabase dashboard → Authentication → Users → **Add user** for each account
+   (owner does this; the app has no signup UI). Then keep **"Allow new users to
+   sign up" disabled** in Auth settings.
+2. Get each `auth.uid()` and insert the allow-list rows **via MCP `execute_sql`**
+   (service role, bypasses RLS):
+   `insert into app_users (user_id, email, role) values ('<uid>', '<email>', '<owner|viewer>');`
+3. Set `contract_meta.h1_disbursement_date` (Budget & payments tab) once H1 is
    paid — that starts the 21-week clock and the penalty math.
 
 ## Open questions from the charter (Fog §6) — RESOLVED
 
-- **Access:** owner only (Brian Parisien). `viewer` role exists in the schema
-  and the UI honours it (read-only) but no viewer account is provisioned.
+- **Access:** Brian Parisien + Chipo Chitanda (co-owners of BC&P LLC) as
+  `owner`. The contractor is **not** a dashboard user — the decision log holds
+  the owner's private negotiation record. `viewer` role exists (read-only) if a
+  family member is added later.
 - **Alerts:** shipped as the deterministic Overview "Attention" panel (passive,
   shown on open). No push/scheduled notifications.
 - **WhatsApp in the decision log:** manual entry for v1 (`source='whatsapp'`).

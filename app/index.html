@@ -123,7 +123,6 @@
     <input id="password" type="password" autocomplete="current-password">
     <div class="row" style="margin-top:16px;">
       <button id="loginBtn">Sign in</button>
-      <button id="signupBtn" class="ghost">Create account</button>
     </div>
     <div id="loginMsg" class="msg"></div>
     <div class="sub" id="loginNote" style="margin-top:14px;font-size:11px;"></div>
@@ -179,10 +178,8 @@ const I18N = {
     'role.owner': 'owner', 'role.viewer': 'viewer', 'role.none': 'not on the allow-list',
     'readonly': 'Read-only — this account is not the owner.',
     'login.email': 'Email', 'login.password': 'Password',
-    'login.signin': 'Sign in', 'login.signup': 'Create account',
-    'login.signingin': 'Signing in…', 'login.creating': 'Creating account…',
-    'login.note': 'Access is controlled server-side (Supabase RLS). A new account sees nothing until the owner adds it to the allow-list.',
-    'login.created': 'Account created. If email confirmation is on, confirm then sign in. Then the owner adds you to the allow-list.',
+    'login.signin': 'Sign in', 'login.signingin': 'Signing in…',
+    'login.note': 'Access is controlled server-side (Supabase RLS). An account sees nothing until the owner adds it to the allow-list.',
     'login.notmember': 'This account ({email}) is authenticated but not on the allow-list, so no data is visible.',
     'login.notmember2': 'The owner adds it with:',
     'raw.summary': 'schema / raw',
@@ -337,10 +334,8 @@ const I18N = {
     'role.owner': 'propietario', 'role.viewer': 'observador', 'role.none': 'sin acceso autorizado',
     'readonly': 'Solo lectura — esta cuenta no es la del propietario.',
     'login.email': 'Correo', 'login.password': 'Contraseña',
-    'login.signin': 'Iniciar sesión', 'login.signup': 'Crear cuenta',
-    'login.signingin': 'Iniciando sesión…', 'login.creating': 'Creando cuenta…',
-    'login.note': 'El acceso se controla en el servidor (Supabase RLS). Una cuenta nueva no ve nada hasta que el propietario la agregue a la lista de acceso.',
-    'login.created': 'Cuenta creada. Si la confirmación por correo está activa, confírmela e inicie sesión. Luego el propietario la agregará a la lista de acceso.',
+    'login.signin': 'Iniciar sesión', 'login.signingin': 'Iniciando sesión…',
+    'login.note': 'El acceso se controla en el servidor (Supabase RLS). Una cuenta no ve nada hasta que el propietario la agregue a la lista de acceso.',
     'login.notmember': 'Esta cuenta ({email}) está autenticada pero no está en la lista de acceso, así que no se muestran datos.',
     'login.notmember2': 'El propietario la agrega con:',
     'raw.summary': 'esquema / técnico',
@@ -1241,7 +1236,6 @@ function applyStaticText() {
   $('lblEmail').textContent = t('login.email');
   $('lblPassword').textContent = t('login.password');
   $('loginBtn').textContent = t('login.signin');
-  $('signupBtn').textContent = t('login.signup');
   $('loginNote').textContent = t('login.note');
   $('logoutBtn').textContent = t('app.signout');
   $('rawSummary').textContent = t('raw.summary');
@@ -1301,12 +1295,8 @@ $('loginBtn').addEventListener('click', async () => {
   if (error) { m.textContent = error.message; m.classList.add('err'); return; }
   m.textContent = '';
 });
-$('signupBtn').addEventListener('click', async () => {
-  const m = $('loginMsg'); m.textContent = t('login.creating'); m.classList.remove('err');
-  const { error } = await db.auth.signUp({ email: $('email').value.trim(), password: $('password').value });
-  if (error) { m.textContent = error.message; m.classList.add('err'); return; }
-  m.textContent = t('login.created');
-});
+// No self-signup. Accounts are created by the owner in the Supabase dashboard
+// (Authentication → Add user) and then allow-listed in app_users.
 $('logoutBtn').addEventListener('click', async () => { await db.auth.signOut(); location.reload(); });
 db.auth.onAuthStateChange(() => refresh());
 
