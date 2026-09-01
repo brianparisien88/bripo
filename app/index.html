@@ -95,8 +95,6 @@
   .toast.err{border-color:var(--red);color:#ffb3ae;}
   .muted-cell{color:var(--dim);}
   .ro-note{font-size:12px;color:var(--amber);margin-left:8px;}
-  details.raw{margin-top:20px;}
-  details.raw summary{cursor:pointer;color:var(--dim);font-size:12px;}
 </style>
 </head>
 <body>
@@ -132,10 +130,6 @@
   <div id="app" class="hide">
     <nav id="nav"></nav>
     <div id="view"></div>
-    <details class="raw">
-      <summary id="rawSummary">schema / raw</summary>
-      <div class="sub" id="rawNote" style="margin-top:8px;"></div>
-    </details>
   </div>
 </div>
 <div id="toast" class="toast"></div>
@@ -182,8 +176,6 @@ const I18N = {
     'login.note': 'Access is controlled server-side (Supabase RLS). An account sees nothing until the owner adds it to the allow-list.',
     'login.notmember': 'This account ({email}) is authenticated but not on the allow-list, so no data is visible.',
     'login.notmember2': 'The owner adds it with:',
-    'raw.summary': 'schema / raw',
-    'raw.note': 'Project mxjoxxckekgtlvbmpkbd · USD only · all figures from the signed contract (Art 2.1, fixed price). Money math is deterministic (no LLM): % complete, advance netting, the $250/week delay penalty.',
 
     'nav.overview': 'Overview', 'nav.milestones': 'Milestones', 'nav.budget': 'Budget & payments',
     'nav.invoices': 'Invoices', 'nav.permits': 'Permits', 'nav.decisions': 'Decision log',
@@ -194,14 +186,14 @@ const I18N = {
 
     'col.date': 'Date', 'col.party': 'Party', 'col.summary': 'Summary', 'col.resolves': 'Resolves',
     'col.source': 'Source', 'col.confirmed': 'Confirmed', 'col.status': 'Status',
-    'col.planned': 'Planned', 'col.actual': 'Actual', 'col.milestone': 'Milestone', 'col.amount': 'Amount',
+    'col.start': 'Start', 'col.end': 'End', 'col.paid': 'Paid', 'col.milestone': 'Milestone', 'col.amount': 'Amount',
     'col.recipient': 'Recipient', 'col.category': 'Category', 'col.notes': 'Notes', 'col.vendor': 'Vendor',
     'col.received': 'Received', 'col.applied': 'Applied', 'col.uploaded': 'Uploaded',
     'col.filename': 'Filename', 'col.linked': 'Linked', 'col.responsible': 'Responsible',
     'col.completed': 'Completed', 'col.estCost': 'Est. cost', 'col.potentialVendor': 'Potential vendor',
     'col.timeSensitive': 'Time-sensitive', 'col.cost': 'Cost', 'col.schedDays': 'Sched (d)',
     'col.owner': 'Owner', 'col.developer': 'Developer', 'col.evidence': 'Evidence',
-    'col.contract': 'Contract', 'col.dueNet': 'Due (net adv.)', 'col.advances': 'Advances',
+    'col.contract': 'Contract', 'col.advances': 'Advances',
     'col.disbursed': 'Disbursed', 'col.dueAtCompletion': 'Due at completion',
     'col.pop': 'PoP', 'col.popDeadline': 'PoP deadline', 'col.pod': 'PoD',
     'col.pazYSalvo': 'Paz y Salvo', 'col.dirDeObra': 'Dir. de Obra',
@@ -211,6 +203,7 @@ const I18N = {
     'overview.tile.contract': 'Contract value', 'overview.tile.pct': '% complete',
     'overview.tile.paid': 'Paid to date', 'overview.tile.remaining': 'Remaining',
     'overview.milestonesComplete': '{done} of {total} milestones complete.',
+    'overview.milestones': 'Milestones',
     'overview.schedule': 'Schedule',
     'overview.clockNotStarted': '21-week contract clock has not started',
     'overview.clockNotStartedDetail': 'Set the H1 disbursement date in Budget & payments once H1 is paid — that starts the clock and the delay-penalty math (Art 7.1).',
@@ -239,18 +232,17 @@ const I18N = {
     'flag.permit.detail': 'Status: {status}. Required before {m}.',
     'flag.warranty.title': 'Warranty clocks running from final delivery {fd}',
     'flag.warranty.detail': 'Labour/materials 2-yr expires {y2} (Art 8.1); structural decennial 10-yr expires {y10} (Art 8.2).',
-    'flag.slip.title': '{m} in progress past its planned date ({planned})',
-    'flag.slip.detail': '{days} day(s) past plan and not yet complete — update the planned date or mark the milestone delayed.',
     'flag.drift.completeNoPay.title': '{m} marked complete but no disbursement recorded',
     'flag.drift.completeNoPay.detail': 'No milestone_disbursement payment is linked to {m}. Record the payment or re-check the status.',
     'flag.drift.payNotComplete.title': '{m} has a disbursement but is not marked complete',
     'flag.drift.payNotComplete.detail': '{amount} disbursed against {m} while its status is "{status}".',
 
     'milestones.heading': 'Milestones (H1–H8)',
-    'milestones.sub': 'Schedule and split from the signed contract (Art 2.1). Amount due nets material advances against the milestone total.',
+    'milestones.sub': "Split from the signed contract (Art 2.1). “Paid” is the running total recorded against each milestone; “Start” / “End” are the actual dates work began and finished. The full advances / amount-due breakdown is in Budget & payments.",
     'milestones.approvalGate': 'Approval gate:', 'milestones.notesLabel': 'Notes:',
     'milestones.notesPlaceholder': 'Director de Obra name / date, inspection refs…',
-    'milestones.payments': 'Payments:', 'milestones.noPayments': 'No payments linked.',
+    'milestones.payments': 'Payments:', 'milestones.noPayments': 'No payments recorded.',
+    'milestones.addPayment': '+ Record a payment',
 
     'budget.contract': 'Contract',
     'budget.meta.h1': 'H1 disbursement date',
@@ -338,8 +330,6 @@ const I18N = {
     'login.note': 'El acceso se controla en el servidor (Supabase RLS). Una cuenta no ve nada hasta que el propietario la agregue a la lista de acceso.',
     'login.notmember': 'Esta cuenta ({email}) está autenticada pero no está en la lista de acceso, así que no se muestran datos.',
     'login.notmember2': 'El propietario la agrega con:',
-    'raw.summary': 'esquema / técnico',
-    'raw.note': 'Proyecto mxjoxxckekgtlvbmpkbd · Solo USD · todas las cifras provienen del contrato firmado (Art 2.1, precio fijo). Los cálculos son deterministas (sin IA): % completado, descuento de anticipos y la penalización de $250/semana.',
 
     'nav.overview': 'Resumen', 'nav.milestones': 'Hitos', 'nav.budget': 'Presupuesto y pagos',
     'nav.invoices': 'Facturas', 'nav.permits': 'Permisos', 'nav.decisions': 'Registro de decisiones',
@@ -350,14 +340,14 @@ const I18N = {
 
     'col.date': 'Fecha', 'col.party': 'Parte', 'col.summary': 'Resumen', 'col.resolves': 'Resuelve',
     'col.source': 'Fuente', 'col.confirmed': 'Confirmado', 'col.status': 'Estado',
-    'col.planned': 'Planificada', 'col.actual': 'Real', 'col.milestone': 'Hito', 'col.amount': 'Monto',
+    'col.start': 'Inicio', 'col.end': 'Fin', 'col.paid': 'Pagado', 'col.milestone': 'Hito', 'col.amount': 'Monto',
     'col.recipient': 'Beneficiario', 'col.category': 'Categoría', 'col.notes': 'Notas', 'col.vendor': 'Proveedor',
     'col.received': 'Recibida', 'col.applied': 'Aplicado', 'col.uploaded': 'Subido',
     'col.filename': 'Archivo', 'col.linked': 'Vinculado', 'col.responsible': 'Responsable',
     'col.completed': 'Completado', 'col.estCost': 'Costo est.', 'col.potentialVendor': 'Proveedor potencial',
     'col.timeSensitive': 'Urgente', 'col.cost': 'Costo', 'col.schedDays': 'Cronog. (d)',
     'col.owner': 'Propietario', 'col.developer': 'Contratista', 'col.evidence': 'Evidencia',
-    'col.contract': 'Contrato', 'col.dueNet': 'A pagar (neto ant.)', 'col.advances': 'Anticipos',
+    'col.contract': 'Contrato', 'col.advances': 'Anticipos',
     'col.disbursed': 'Desembolsado', 'col.dueAtCompletion': 'A pagar al completar',
     'col.pop': 'Compra', 'col.popDeadline': 'Límite compra', 'col.pod': 'Entrega',
     'col.pazYSalvo': 'Paz y Salvo', 'col.dirDeObra': 'Dir. de Obra',
@@ -367,6 +357,7 @@ const I18N = {
     'overview.tile.contract': 'Valor del contrato', 'overview.tile.pct': '% completado',
     'overview.tile.paid': 'Pagado a la fecha', 'overview.tile.remaining': 'Restante',
     'overview.milestonesComplete': '{done} de {total} hitos completados.',
+    'overview.milestones': 'Hitos',
     'overview.schedule': 'Cronograma',
     'overview.clockNotStarted': 'El plazo contractual de 21 semanas no ha iniciado',
     'overview.clockNotStartedDetail': 'Registre la fecha de desembolso de H1 en Presupuesto y pagos cuando se pague H1 — eso inicia el plazo y el cálculo de penalización por retraso (Art 7.1).',
@@ -395,18 +386,17 @@ const I18N = {
     'flag.permit.detail': 'Estado: {status}. Requerido antes de {m}.',
     'flag.warranty.title': 'Plazos de garantía corriendo desde la entrega final {fd}',
     'flag.warranty.detail': 'Garantía de mano de obra/materiales de 2 años vence {y2} (Art 8.1); garantía estructural decenal de 10 años vence {y10} (Art 8.2).',
-    'flag.slip.title': '{m} en progreso y ya pasó su fecha planificada ({planned})',
-    'flag.slip.detail': '{days} día(s) sobre lo planificado y aún sin completar — actualice la fecha planificada o marque el hito como retrasado.',
     'flag.drift.completeNoPay.title': '{m} marcado como completo pero sin desembolso registrado',
     'flag.drift.completeNoPay.detail': 'No hay pago de desembolso vinculado a {m}. Registre el pago o revise el estado.',
     'flag.drift.payNotComplete.title': '{m} tiene un desembolso pero no está marcado como completo',
     'flag.drift.payNotComplete.detail': '{amount} desembolsado a {m} mientras su estado es "{status}".',
 
     'milestones.heading': 'Hitos (H1–H8)',
-    'milestones.sub': 'Cronograma y desglose del contrato firmado (Art 2.1). El monto a pagar descuenta los anticipos de materiales del total del hito.',
+    'milestones.sub': 'Desglose del contrato firmado (Art 2.1). “Pagado” es el total acumulado registrado contra cada hito; “Inicio” / “Fin” son las fechas reales en que empezó y terminó el trabajo. El desglose completo de anticipos / saldo a pagar está en Presupuesto y pagos.',
     'milestones.approvalGate': 'Puerta de aprobación:', 'milestones.notesLabel': 'Notas:',
     'milestones.notesPlaceholder': 'Nombre del Director de Obra / fecha, referencias de inspección…',
-    'milestones.payments': 'Pagos:', 'milestones.noPayments': 'Sin pagos vinculados.',
+    'milestones.payments': 'Pagos:', 'milestones.noPayments': 'Sin pagos registrados.',
+    'milestones.addPayment': '+ Registrar un pago',
 
     'budget.contract': 'Contrato',
     'budget.meta.h1': 'Fecha de desembolso H1',
@@ -570,6 +560,8 @@ const disbursedFor = mid =>
   S.payments.filter(p => p.milestone_id === mid && p.payment_type === 'milestone_disbursement')
     .reduce((s, p) => s + Number(p.amount), 0);
 const amountDue = m => Number(m.contract_amount) - advancesFor(m.id);
+// running total of every payment recorded against a milestone (disbursements + advances)
+const paidFor = mid => S.payments.filter(p => p.milestone_id === mid).reduce((s, p) => s + Number(p.amount), 0);
 
 const paidToDate = () => S.payments.reduce((s, p) => s + Number(p.amount), 0);
 const pctComplete = () =>
@@ -638,14 +630,7 @@ function attentionFlags() {
     }
   }
 
-  // 5 — milestone slipping: in progress / pending inspection past its planned date
-  for (const m of S.milestones) {
-    if (['in_progress', 'pending_inspection'].includes(m.status) && m.planned_date && m.planned_date < TODAY)
-      flags.push({ level: 'amber', t: t('flag.slip.title', { m: m.id, planned: m.planned_date }),
-        d: t('flag.slip.detail', { days: daysBetween(m.planned_date, TODAY) }) });
-  }
-
-  // 6 — bookkeeping drift between milestone status and recorded disbursements
+  // bookkeeping drift between milestone status and recorded disbursements
   for (const m of S.milestones) {
     const disb = disbursedFor(m.id);
     if (m.status === 'complete' && disb === 0)
@@ -740,6 +725,23 @@ function viewOverview(v) {
     done: S.milestones.filter(m => m.status === 'complete').length, total: S.milestones.length,
   }) }));
 
+  v.append(h('h2', {}, t('overview.milestones')));
+  v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
+    h('thead', {}, h('tr', {}, [
+      [t('col.num'), 0], [t('col.milestone'), 0], [t('col.status'), 0],
+      [t('col.paid'), 1], [t('col.contract'), 1], [t('col.start'), 0], [t('col.end'), 0],
+    ].map(([x, n]) => h('th', { class: n ? 'num' : '' }, x)))),
+    h('tbody', {}, S.milestones.map(m => h('tr', {}, [
+      h('td', {}, m.id),
+      h('td', {}, m.name),
+      h('td', {}, pill(m.status)),
+      h('td', { class: 'num' }, money(paidFor(m.id))),
+      h('td', { class: 'num' }, money(m.contract_amount)),
+      h('td', {}, dateStr(m.start_date)),
+      h('td', {}, dateStr(m.end_date)),
+    ]))),
+  ])));
+
   v.append(h('h2', {}, t('overview.schedule')));
   if (!sc.started) {
     v.append(h('div', { class: 'flag amber' }, [h('span', { class: 'dot' }),
@@ -782,11 +784,11 @@ function viewMilestones(v) {
       h('td', {}, m.name),
       h('td', { class: 'num' }, Number(m.pct_of_contract) + '%'),
       h('td', { class: 'num' }, money(m.contract_amount)),
-      h('td', { class: 'num' }, money(amountDue(m))),
+      h('td', { class: 'num' }, money(paidFor(m.id))),
       h('td', {}, selectCell(m.status, ['not_started', 'in_progress', 'pending_inspection', 'complete', 'delayed'],
         val => upd('milestones', { id: m.id }, { status: val, updated_at: new Date().toISOString() }, m.id))),
-      h('td', {}, dateCell(m.planned_date, val => upd('milestones', { id: m.id }, { planned_date: val }, m.id))),
-      h('td', {}, dateCell(m.actual_date, val => upd('milestones', { id: m.id }, { actual_date: val }, m.id))),
+      h('td', {}, dateCell(m.start_date, val => upd('milestones', { id: m.id }, { start_date: val }, m.id))),
+      h('td', {}, dateCell(m.end_date, val => upd('milestones', { id: m.id }, { end_date: val }, m.id))),
       h('td', {}, checkCell(m.paz_y_salvo_on_file, val => upd('milestones', { id: m.id }, { paz_y_salvo_on_file: val }, m.id))),
       h('td', {}, checkCell(m.director_de_obra_approved, val => upd('milestones', { id: m.id }, { director_de_obra_approved: val }, m.id))),
     ]));
@@ -800,12 +802,16 @@ function viewMilestones(v) {
           : (m.notes || '—'),
       ]),
       linkedPaymentsMini(m.id),
+      ownerOnly(h('div', { style: 'margin-top:8px' }, [
+        h('button', { class: 'ghost sm', onclick: () => toggleForm('mpf_' + m.id, host => buildPaymentForm(host, { milestoneId: m.id })) }, t('milestones.addPayment')),
+        h('div', { id: 'mpf_' + m.id }),
+      ])),
     ])));
   }
   v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
     h('thead', {}, h('tr', {}, [
-      [t('col.num'), 0], [t('col.milestone'), 0], ['%', 1], [t('col.contract'), 1], [t('col.dueNet'), 1],
-      [t('col.status'), 0], [t('col.planned'), 0], [t('col.actual'), 0], [t('col.pazYSalvo'), 0], [t('col.dirDeObra'), 0],
+      [t('col.num'), 0], [t('col.milestone'), 0], ['%', 1], [t('col.contract'), 1], [t('col.paid'), 1],
+      [t('col.status'), 0], [t('col.start'), 0], [t('col.end'), 0], [t('col.pazYSalvo'), 0], [t('col.dirDeObra'), 0],
     ].map(([x, n]) => h('th', { class: n ? 'num' : '' }, x)))),
     body,
   ])));
@@ -895,26 +901,32 @@ function paymentRow(p) {
     ]),
   ]);
 }
-function togglePaymentForm() {
-  const host = $('paymentForm');
-  if (host.children.length) { host.innerHTML = ''; return; }
-  const f = {};
+const togglePaymentForm = () => toggleForm('paymentForm', host => buildPaymentForm(host, {}));
+
+// Shared add-payment form. opts.milestoneId locks the payment to one milestone
+// (used from the Milestones tab) and hides the milestone picker.
+function buildPaymentForm(host, opts = {}) {
+  const f = { payment_type: 'milestone_disbursement' };
+  if (opts.milestoneId) f.milestone_id = opts.milestoneId;
   const bizDeadline = d => {
     const x = new Date(d); let n = 10;
     while (n > 0) { x.setDate(x.getDate() + 1); if (x.getDay() !== 0 && x.getDay() !== 6) n--; }
     return x.toISOString().slice(0, 10);
   };
   f.proof_of_purchase_deadline = bizDeadline(TODAY);
-  host.append(h('div', { class: 'inline-form' }, [
+  const fields = [
     field(t('col.date'), h('input', { type: 'date', value: TODAY, onchange: e => f.date = e.target.value })),
     field(t('budget.form.amount'), h('input', { type: 'number', step: '0.01', onchange: e => f.amount = Number(e.target.value) })),
     field(t('budget.form.type'), h('select', { onchange: e => f.payment_type = e.target.value }, [
       h('option', { value: 'milestone_disbursement' }, t('budget.type.disb')),
       h('option', { value: 'material_advance' }, t('budget.type.adv')),
     ])),
+  ];
+  if (!opts.milestoneId) fields.push(
     field(t('col.milestone'), h('select', { onchange: e => f.milestone_id = e.target.value || null }, [
       h('option', { value: '' }, '—'), ...S.milestones.map(m => h('option', { value: m.id }, `${m.id} ${m.name}`)),
-    ])),
+    ])));
+  fields.push(
     field(t('col.recipient'), h('input', { type: 'text', onchange: e => f.recipient = e.target.value || null })),
     field(t('budget.form.method'), h('input', { type: 'text', placeholder: t('budget.form.methodPh'), onchange: e => f.method = e.target.value || null })),
     field(t('budget.form.advCat'), h('select', { onchange: e => f.advance_category = e.target.value || null }, [
@@ -927,12 +939,12 @@ function togglePaymentForm() {
     h('div', { class: 'full row' }, [
       h('button', { onclick: async () => {
         if (!f.date || !f.amount || !f.payment_type) { toast(t('budget.toast.paymentReq'), true); return; }
-        await ins('payments', f);
+        if (await ins('payments', f)) host.innerHTML = '';
       } }, t('budget.form.savePayment')),
       h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, t('common.cancel')),
       h('span', { class: 'sub', text: t('budget.form.paymentHint') }),
-    ]),
-  ]));
+    ]));
+  host.append(h('div', { class: 'inline-form' }, fields));
 }
 
 /* ---------------- Invoices ---------------- */
@@ -1238,8 +1250,6 @@ function applyStaticText() {
   $('loginBtn').textContent = t('login.signin');
   $('loginNote').textContent = t('login.note');
   $('logoutBtn').textContent = t('app.signout');
-  $('rawSummary').textContent = t('raw.summary');
-  $('rawNote').textContent = t('raw.note');
 }
 function renderLang() {
   const box = $('langToggle'); box.innerHTML = '';

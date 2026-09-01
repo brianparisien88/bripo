@@ -425,13 +425,13 @@
       "type": "text"
     },
     {
-      "column": "planned_date",
+      "column": "start_date",
       "default": null,
       "nullable": true,
       "type": "date"
     },
     {
-      "column": "actual_date",
+      "column": "end_date",
       "default": null,
       "nullable": true,
       "type": "date"
