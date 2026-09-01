@@ -56,6 +56,8 @@ Migrations in `supabase/migrations/`:
   with matching member-read / owner-write policies, and the `is_member()` /
   `is_owner()` EXECUTE grants (kept on `anon` on purpose — see the file's note;
   revoking breaks RLS evaluation for logged-out requests).
+- `20260901120000_milestone_start_end_dates.sql` — `milestones.planned_date` →
+  `start_date`, `actual_date` → `end_date`.
 
 13 tables, all RLS member-read / owner-write, no anon access:
 
@@ -78,12 +80,22 @@ Future work, Vendors, Documents). Sign-in shell → `is_member()` gate →
 `is_owner()` decides read-only vs editable. Every write goes through RLS and
 also appends to `activity_log`. **EN / ES** via the `t()` helper + `I18N` dict +
 the header toggle (persisted to `localStorage['bripo_lang']`); user-entered data
-is never translated, only the chrome. The Overview "Attention" panel is the v1
-alerts feature (deterministic date math): prominent delay-penalty banner,
-material-advance PoP/PoD compliance flags, the next-milestone approval gate
-(Director de Obra, Paz y Salvo H2+, gating permits per `MILESTONE_PERMIT_GATES`),
-milestone-slipping (in-progress past planned date) and bookkeeping-drift
-(milestone status vs recorded disbursements) checks.
+is never translated, only the chrome. Overview also has a milestone strip
+(status / paid / contract / start / end per H1–H8) so Milestones-tab edits are
+visible there immediately. The Overview "Attention" panel is the v1 alerts
+feature (deterministic date math): prominent delay-penalty banner, material-
+advance PoP/PoD compliance flags, the next-milestone approval gate (Director de
+Obra, Paz y Salvo H2+, gating permits per `MILESTONE_PERMIT_GATES`), and a
+bookkeeping-drift check (milestone status vs recorded disbursements).
+
+`milestones.start_date` / `end_date` (renamed from `planned_date` / `actual_date`
+in migration `20260901120000`) are ACTUAL start/finish dates — the contract makes
+no per-milestone date promises; the only schedule commitment is the 21-week clock.
+The Milestones tab shows a read-only **Paid** column = Σ payments linked to that
+milestone; recording a payment (incl. partial installments) is done from the
+milestone's expand row (`buildPaymentForm` with a locked `milestoneId`) or the
+Budget tab. The per-milestone advances / amount-due breakdown lives on the
+Budget tab only.
 
 - **% complete** = Σ(contract_amount of milestones where status='complete') / 73500.
 - **Amount due at a milestone** = `milestones.contract_amount − Σ(payments.amount
@@ -125,15 +137,16 @@ milestone-slipping (in-progress past planned date) and bookkeeping-drift
 
 ## Open questions from the charter (Fog §6) — RESOLVED
 
-- **Access:** Brian Parisien + Chipo Chitanda (co-owners of BC&P LLC) as
-  `owner`. The contractor is **not** a dashboard user — the decision log holds
-  the owner's private negotiation record. `viewer` role exists (read-only) if a
-  family member is added later.
+- **Access:** `app_users` has brianparisien@gmail.com + chipochitanda@gmail.com
+  as `owner` (co-owners of BC&P LLC) and jmcklin06@gmail.com (Jorge, the
+  contractor) as `viewer` — owner's explicit call, made knowing a viewer can
+  read every table including `decision_log`. Keep genuinely owner-private matters
+  (disputes, legal advice) out of the dashboard from here on.
 - **Alerts:** shipped as the deterministic Overview "Attention" panel (passive,
   shown on open). No push/scheduled notifications.
-- **WhatsApp in the decision log:** manual entry for v1 (`source='whatsapp'`).
-  Owner will provide a chat export to bulk-seed `decision_log` — a local WhatsApp
-  export sits at `docs/WhatsApp Chat with Jorge McKlin - Builder …/` (gitignored,
-  has PII); process it into confirmed/unconfirmed `decision_log` rows on request.
+- **WhatsApp in the decision log:** manual entry (`source='whatsapp'`). The
+  Jul–Aug negotiation export was imported 2026-08-31 as 26 `confirmed=false`
+  rows (owner confirms/prunes in the UI). Export sits at `docs/WhatsApp Chat
+  with Jorge McKlin - Builder …/` (gitignored, has PII).
 - **Director de Obra:** the `milestones.director_de_obra_approved` boolean +
   `milestones.notes` free-text is enough. No dedicated sub-record.
