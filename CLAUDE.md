@@ -41,12 +41,23 @@ static dashboard (app/index.html, GitHub Pages)  ◄──  reads live via supab
   money, milestones, permits — it doesn't need identity numbers. The contract PDF,
   if stored, goes in a private Supabase Storage bucket under the same RLS, never
   a public link.
-- No public signup. Owner is added to `app_users` manually (see below).
+- **No signup UI.** The login screen is sign-in only. Accounts are created by
+  the owner in the Supabase dashboard (Authentication → Add user) and then
+  allow-listed in `app_users`. Keep "Allow new users to sign up" disabled in
+  Supabase Auth settings. An account with no `app_users` row sees nothing — RLS
+  is the boundary.
 
 ## Data model
 
-Migration `supabase/migrations/20260831210000_init.sql` — 13 tables, all RLS
-member-read / owner-write, no anon access:
+Migrations in `supabase/migrations/`:
+- `20260831210000_init.sql` — 13 tables + helpers + RLS.
+- `20260831213000_seeds_storage_hardening.sql` — idempotent seeds (milestones
+  H1–H8, 11 permits, 3 future-work items), the private `documents` Storage bucket
+  with matching member-read / owner-write policies, and the `is_member()` /
+  `is_owner()` EXECUTE grants (kept on `anon` on purpose — see the file's note;
+  revoking breaks RLS evaluation for logged-out requests).
+
+13 tables, all RLS member-read / owner-write, no anon access:
 
 `app_users` (allow-list) · `contract_meta` (single row 'current' — penalty +
 warranty math) · `milestones` (H1–H8, seeded) · `payments` (milestone_disbursement
@@ -59,7 +70,20 @@ warranty math) · `milestones` (H1–H8, seeded) · `payments` (milestone_disbur
 
 Helpers: `public.is_member()`, `public.is_owner()`, `public.schema_catalog()`.
 
-## Deterministic logic to build (no LLM)
+## Deterministic logic (no LLM) — BUILT in `app/index.html` (v1)
+
+Single-file vanilla-JS dashboard, `supabase-js` from CDN, 10 tabs (Overview,
+Milestones, Budget & payments, Invoices, Permits, Decision log, Change requests,
+Future work, Vendors, Documents). Sign-in shell → `is_member()` gate →
+`is_owner()` decides read-only vs editable. Every write goes through RLS and
+also appends to `activity_log`. **EN / ES** via the `t()` helper + `I18N` dict +
+the header toggle (persisted to `localStorage['bripo_lang']`); user-entered data
+is never translated, only the chrome. The Overview "Attention" panel is the v1
+alerts feature (deterministic date math): prominent delay-penalty banner,
+material-advance PoP/PoD compliance flags, the next-milestone approval gate
+(Director de Obra, Paz y Salvo H2+, gating permits per `MILESTONE_PERMIT_GATES`),
+milestone-slipping (in-progress past planned date) and bookkeeping-drift
+(milestone status vs recorded disbursements) checks.
 
 - **% complete** = Σ(contract_amount of milestones where status='complete') / 73500.
 - **Amount due at a milestone** = `milestones.contract_amount − Σ(payments.amount
@@ -83,25 +107,33 @@ Helpers: `public.is_member()`, `public.is_owner()`, `public.schema_catalog()`.
   file was created).
 - The publishable key is intentionally in `app/index.html`. There is no secret
   key in v1; if one is ever added it never touches `app/` or a committed file.
-- After any migration: `python tools/schema_snapshot.py` (needs a secret key —
-  add `SUPABASE_SECRET_KEY` to `.env` from the Supabase dashboard when needed)
-  and commit `docs/schema-snapshot.json`; update this file.
+- After any migration: `set -a && . ./.env && set +a && python tools/schema_snapshot.py`
+  (uses `SUPABASE_URL` + `SUPABASE_PUBLISHABLE_KEY` — the `schema_catalog()` RPC
+  is granted to anon on purpose) and commit `docs/schema-snapshot.json`; update
+  this file. Only column shape is captured, not seed rows.
 
-## First-run setup (do once, in a build session)
+## First-run setup (do once) — NOT yet done as of v1 handoff
 
-1. `app/index.html` signup/login screen → owner creates their account in Supabase
-   Auth (or via the dashboard).
-2. Get the owner's `auth.uid()` and insert the allow-list row **via MCP
-   `execute_sql`** (service role, bypasses RLS):
-   `insert into app_users (user_id, email, role) values ('<uid>', '<email>', 'owner');`
-3. Set `contract_meta.h1_disbursement_date` once H1 is paid — that starts the
-   21-week clock and the penalty math.
+1. Supabase dashboard → Authentication → Users → **Add user** for each account
+   (owner does this; the app has no signup UI). Then keep **"Allow new users to
+   sign up" disabled** in Auth settings.
+2. Get each `auth.uid()` and insert the allow-list rows **via MCP `execute_sql`**
+   (service role, bypasses RLS):
+   `insert into app_users (user_id, email, role) values ('<uid>', '<email>', '<owner|viewer>');`
+3. Set `contract_meta.h1_disbursement_date` (Budget & payments tab) once H1 is
+   paid — that starts the 21-week clock and the penalty math.
 
-## Open questions from the charter (Fog §6) — resolve before/while building
+## Open questions from the charter (Fog §6) — RESOLVED
 
-- Who else needs access (spouse / lawyer / accountant)?
-- How far to take alerts in v1 vs defer?
-- Is WhatsApp correspondence in scope for v1's decision log (manual entry only,
-  or a chat-export import)?
-- Director de Obra still "TBD" in the contract — track their sign-off as a field
-  per milestone, or is the `director_de_obra_approved` checkbox enough?
+- **Access:** Brian Parisien + Chipo Chitanda (co-owners of BC&P LLC) as
+  `owner`. The contractor is **not** a dashboard user — the decision log holds
+  the owner's private negotiation record. `viewer` role exists (read-only) if a
+  family member is added later.
+- **Alerts:** shipped as the deterministic Overview "Attention" panel (passive,
+  shown on open). No push/scheduled notifications.
+- **WhatsApp in the decision log:** manual entry for v1 (`source='whatsapp'`).
+  Owner will provide a chat export to bulk-seed `decision_log` — a local WhatsApp
+  export sits at `docs/WhatsApp Chat with Jorge McKlin - Builder …/` (gitignored,
+  has PII); process it into confirmed/unconfirmed `decision_log` rows on request.
+- **Director de Obra:** the `milestones.director_de_obra_approved` boolean +
+  `milestones.notes` free-text is enough. No dedicated sub-record.
