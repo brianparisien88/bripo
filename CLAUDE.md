@@ -58,6 +58,12 @@ Migrations in `supabase/migrations/`:
   revoking breaks RLS evaluation for logged-out requests).
 - `20260901120000_milestone_start_end_dates.sql` — `milestones.planned_date` →
   `start_date`, `actual_date` → `end_date`.
+- `20260902130000_out_of_pocket_flag.sql` — `payments.out_of_pocket` +
+  `invoices.out_of_pocket` booleans. When true on a payment it is the owner's
+  direct/off-contract spend: recorded, may be linked to a milestone for context,
+  but **excluded from every contract-budget calculation** (`paidToDate`,
+  `paidFor`, `advancesFor`, `disbursedFor`, `amountDue`). Surfaced separately as
+  "Out-of-pocket spend" + "Grand total" (= contract price + out-of-pocket) tiles.
 
 13 tables, all RLS member-read / owner-write, no anon access:
 
