@@ -65,6 +65,15 @@ Migrations in `supabase/migrations/`:
   `paidFor`, `advancesFor`, `disbursedFor`, `amountDue`). Surfaced separately as
   "Out-of-pocket spend" + "Grand total" (= contract price + out-of-pocket) tiles.
 
+**Invoices are not payments.** Money totals (Overview, Budget, milestone Paid)
+are `payments`-driven only. An invoice is the paper trail; it moves nothing until
+a payment is recorded against it. The Invoices tab has a per-row "Record a
+payment for this invoice" that opens `buildPaymentForm` with `prefill` (amount =
+invoice total − already applied, recipient, milestone, out_of_pocket) and
+`linkInvoiceId` — on save it inserts the payment and the `payment_invoice_links`
+row. Documents upload is multi-file (`uploadDocs`); each invoice row has an
+attach-files sub-row (`entityFiles`).
+
 13 tables, all RLS member-read / owner-write, no anon access:
 
 `app_users` (allow-list) · `contract_meta` (single row 'current' — penalty +

@@ -304,6 +304,8 @@ const I18N = {
     'adv.roof_structure': 'roof structure', 'adv.electrical_cable': 'electrical cable',
 
     'invoices.heading': 'Invoices received', 'invoices.add': '+ Add invoice',
+    'invoices.recordPayment': '+ Record a payment for this invoice',
+    'invoices.paymentNote': 'An invoice is a bill received. It only affects the Overview / budget once you record a payment against it here — the payment carries the money, the invoice is the paper trail.',
     'invoices.linkHeading': 'Payment ↔ invoice links (many-to-many)',
     'invoices.linkSub': 'Matching is rarely 1:1 — one payment can cover several invoices, one invoice can be paid across several payments.',
     'invoices.form.dateReceived': 'Date received', 'invoices.form.saveInvoice': 'Save invoice',
@@ -463,6 +465,8 @@ const I18N = {
     'adv.roof_structure': 'estructura de techo', 'adv.electrical_cable': 'cable eléctrico',
 
     'invoices.heading': 'Facturas recibidas', 'invoices.add': '+ Agregar factura',
+    'invoices.recordPayment': '+ Registrar un pago de esta factura',
+    'invoices.paymentNote': 'Una factura es una cuenta recibida. Solo afecta el Resumen / presupuesto cuando registra un pago contra ella aquí — el pago mueve el dinero, la factura es el respaldo.',
     'invoices.linkHeading': 'Vínculos pago ↔ factura (muchos a muchos)',
     'invoices.linkSub': 'La conciliación rara vez es 1:1 — un pago puede cubrir varias facturas y una factura puede pagarse en varios pagos.',
     'invoices.form.dateReceived': 'Fecha recibida', 'invoices.form.saveInvoice': 'Guardar factura',
@@ -761,11 +765,13 @@ function viewOverview(v) {
   const oop = outOfPocketTotal();
   v.append(h('div', { class: 'tiles' }, [
     tile(t('overview.tile.contract'), money(contractPrice())),
+    tile(t('overview.tile.paid'), money(paid)),
+    tile(t('overview.tile.pct'), pct.toFixed(1) + '%'),
+    tile(t('overview.tile.remaining'), money(contractPrice() - paid)),
+  ]));
+  v.append(h('div', { class: 'tiles', style: 'max-width:600px' }, [
     tile(t('overview.tile.offContract'), money(oop)),
     tile(t('overview.tile.grandTotal'), money(contractPrice() + oop)),
-    tile(t('overview.tile.pct'), pct.toFixed(1) + '%'),
-    tile(t('overview.tile.paid'), money(paid)),
-    tile(t('overview.tile.remaining'), money(contractPrice() - paid)),
   ]));
   v.append(h('div', { class: 'bar' }, h('i', { style: `width:${Math.min(100, pct).toFixed(1)}%` })));
   v.append(h('div', { class: 'sub', text: t('overview.milestonesComplete', {
@@ -954,9 +960,10 @@ function paymentRow(p) {
 const togglePaymentForm = () => toggleForm('paymentForm', host => buildPaymentForm(host, {}));
 
 // Shared add-payment form. opts.milestoneId locks the payment to one milestone
-// (used from the Milestones tab) and hides the milestone picker.
+// (Milestones tab) and hides the milestone picker. opts.prefill seeds fields;
+// opts.linkInvoiceId also creates a payment↔invoice link on save.
 function buildPaymentForm(host, opts = {}) {
-  const f = { payment_type: 'milestone_disbursement', date: TODAY, out_of_pocket: false };
+  const f = { payment_type: 'milestone_disbursement', date: TODAY, out_of_pocket: false, ...(opts.prefill || {}) };
   if (opts.milestoneId) f.milestone_id = opts.milestoneId;
   const bizDeadline = d => {
     const x = new Date(d); let n = 10;
@@ -966,7 +973,7 @@ function buildPaymentForm(host, opts = {}) {
   f.proof_of_purchase_deadline = bizDeadline(TODAY);
   const fields = [
     field(t('col.date'), h('input', { type: 'date', value: TODAY, onchange: e => f.date = e.target.value })),
-    field(t('budget.form.amount'), h('input', { type: 'number', step: '0.01', onchange: e => f.amount = Number(e.target.value) })),
+    field(t('budget.form.amount'), h('input', { type: 'number', step: '0.01', value: f.amount ?? '', onchange: e => f.amount = Number(e.target.value) })),
     field(t('budget.form.type'), h('select', { onchange: e => f.payment_type = e.target.value }, [
       h('option', { value: 'milestone_disbursement' }, t('budget.type.disb')),
       h('option', { value: 'material_advance' }, t('budget.type.adv')),
@@ -974,10 +981,11 @@ function buildPaymentForm(host, opts = {}) {
   ];
   if (!opts.milestoneId) fields.push(
     field(t('col.milestone'), h('select', { onchange: e => f.milestone_id = e.target.value || null }, [
-      h('option', { value: '' }, '—'), ...S.milestones.map(m => h('option', { value: m.id }, `${m.id} ${m.name}`)),
+      h('option', { value: '' }, '—'),
+      ...S.milestones.map(m => h('option', { value: m.id, ...(m.id === f.milestone_id ? { selected: true } : {}) }, `${m.id} ${m.name}`)),
     ])));
   fields.push(
-    field(t('col.recipient'), h('input', { type: 'text', onchange: e => f.recipient = e.target.value || null })),
+    field(t('col.recipient'), h('input', { type: 'text', value: f.recipient ?? '', onchange: e => f.recipient = e.target.value || null })),
     field(t('budget.form.method'), h('input', { type: 'text', placeholder: t('budget.form.methodPh'), onchange: e => f.method = e.target.value || null })),
     field(t('budget.form.advCat'), h('select', { onchange: e => f.advance_category = e.target.value || null }, [
       h('option', { value: '' }, t('budget.form.advCatPh')),
@@ -987,7 +995,7 @@ function buildPaymentForm(host, opts = {}) {
       onchange: e => f.proof_of_purchase_deadline = e.target.value || null })),
     h('div', { class: 'full' }, [
       h('label', { style: 'display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:13px;' }, [
-        h('input', { type: 'checkbox', onchange: e => f.out_of_pocket = e.target.checked }),
+        h('input', { type: 'checkbox', ...(f.out_of_pocket ? { checked: true } : {}), onchange: e => f.out_of_pocket = e.target.checked }),
         t('payment.offContract'),
       ]),
       h('div', { class: 'sub', style: 'font-size:11px;margin-top:3px', text: t('payment.offContractHint') }),
@@ -996,7 +1004,14 @@ function buildPaymentForm(host, opts = {}) {
     h('div', { class: 'full row' }, [
       h('button', { onclick: async () => {
         if (!f.date || !f.amount || !f.payment_type) { toast(t('budget.toast.paymentReq'), true); return; }
-        if (await ins('payments', f)) host.innerHTML = '';
+        const rows = await ins('payments', f);
+        if (!rows) return;
+        if (opts.linkInvoiceId && rows[0]) {
+          const { error } = await db.from('payment_invoice_links')
+            .insert({ payment_id: rows[0].id, invoice_id: opts.linkInvoiceId, amount_applied: Number(f.amount) });
+          if (error) toast(error.message, true);
+          else { await loadAll(); render(); }
+        } else { host.innerHTML = ''; }
       } }, t('budget.form.savePayment')),
       h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, t('common.cancel')),
       h('span', { class: 'sub', text: t('budget.form.paymentHint') }),
@@ -1008,6 +1023,7 @@ function buildPaymentForm(host, opts = {}) {
 function viewInvoices(v) {
   v.append(h('div', { class: 'spread' }, [h('h2', {}, t('invoices.heading')),
     ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('invoiceForm', invoiceForm) }, t('invoices.add')))]));
+  v.append(h('div', { class: 'sub', text: t('invoices.paymentNote') }));
   v.append(h('div', { id: 'invoiceForm' }));
   const invBody = h('tbody');
   for (const inv of S.invoices) {
@@ -1024,7 +1040,16 @@ function viewInvoices(v) {
       h('td', {}, inv.notes || '—'),
       h('td', {}, ownerOnly(h('button', { class: 'ghost sm', onclick: () => del('invoices', { id: inv.id }, inv.id) }, '×'))),
     ]));
-    invBody.append(h('tr', { class: 'sub-row' }, h('td', { colspan: 9 }, entityFiles('invoice', inv.id))));
+    invBody.append(h('tr', { class: 'sub-row' }, h('td', { colspan: 9 }, [
+      ownerOnly(h('div', { style: 'margin-bottom:8px' }, [
+        h('button', { class: 'ghost sm', onclick: () => toggleForm('pfinv_' + inv.id, host => buildPaymentForm(host, {
+          prefill: { amount: (Number(inv.amount) - applied) || Number(inv.amount), recipient: inv.vendor, milestone_id: inv.milestone_id, out_of_pocket: !!inv.out_of_pocket },
+          linkInvoiceId: inv.id,
+        })) }, t('invoices.recordPayment')),
+        h('div', { id: 'pfinv_' + inv.id }),
+      ])),
+      entityFiles('invoice', inv.id),
+    ])));
   }
   v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
     h('thead', {}, h('tr', {}, [
@@ -1271,12 +1296,12 @@ function viewDocuments(v) {
   if (S.isOwner) {
     const f = {};
     v.append(h('div', { class: 'inline-form' }, [
-      field(t('documents.form.file'), h('input', { type: 'file', onchange: e => f.file = e.target.files[0] })),
+      field(t('documents.form.file'), h('input', { type: 'file', multiple: true, onchange: e => f.files = e.target.files })),
       field(t('documents.form.linkedTo'), h('select', { onchange: e => f.linked_entity_type = e.target.value || null }, [
         h('option', { value: '' }, '—'), ...['milestone', 'permit', 'payment', 'invoice', 'vendor', 'change_request'].map(x => h('option', { value: x }, t('ent.' + x))),
       ])),
       field(t('documents.form.entityId'), h('input', { type: 'text', placeholder: t('documents.form.entityIdPh'), onchange: e => f.linked_entity_id = e.target.value || null })),
-      h('div', { class: 'row' }, h('button', { onclick: () => uploadDoc(f) }, t('documents.form.upload'))),
+      h('div', { class: 'row' }, h('button', { onclick: () => uploadDocs(f.files, f.linked_entity_type, f.linked_entity_id) }, t('documents.form.upload'))),
     ]));
   }
   v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
@@ -1304,18 +1329,29 @@ function entityFiles(type, id) {
   if (S.isOwner) {
     const ff = {};
     wrap.append(h('div', { class: 'row', style: 'margin-top:8px' }, [
-      h('input', { type: 'file', onchange: e => ff.file = e.target.files[0] }),
-      h('button', { class: 'sm', onclick: () => uploadDoc({ file: ff.file, linked_entity_type: type, linked_entity_id: id }) }, t('files.upload')),
+      h('input', { type: 'file', multiple: true, onchange: e => ff.files = e.target.files }),
+      h('button', { class: 'sm', onclick: () => uploadDocs(ff.files, type, id) }, t('files.upload')),
     ]));
   }
   return wrap;
 }
-async function uploadDoc(f) {
-  if (!f.file) { toast(t('documents.toast.chooseFile'), true); return; }
-  const path = `${Date.now()}_${f.file.name}`.replace(/[^\w.\-]/g, '_');
-  const { error } = await db.storage.from('documents').upload(path, f.file);
-  if (error) { toast('Upload: ' + error.message, true); return; }
-  await ins('documents', { filename: f.file.name, storage_path: path, linked_entity_type: f.linked_entity_type, linked_entity_id: f.linked_entity_id });
+// Upload one or more files to the documents bucket, then insert their rows in one write.
+async function uploadDocs(files, type, id) {
+  const list = [...(files || [])];
+  if (!list.length) { toast(t('documents.toast.chooseFile'), true); return; }
+  const rows = [];
+  for (const file of list) {
+    const path = `${Date.now()}_${Math.random().toString(36).slice(2, 7)}_${file.name}`.replace(/[^\w.\-]/g, '_');
+    const { error } = await db.storage.from('documents').upload(path, file);
+    if (error) { toast('Upload: ' + error.message, true); return; }
+    rows.push({ filename: file.name, storage_path: path, linked_entity_type: type || null, linked_entity_id: id || null });
+  }
+  const { error } = await db.from('documents').insert(rows);
+  if (error) { toast(error.message, true); return; }
+  await logActivity('documents', id ?? '', 'insert', { count: rows.length, type: type || null });
+  toast(t('common.saved'));
+  await loadAll();
+  render();
 }
 async function openDoc(d) {
   const { data, error } = await db.storage.from('documents').createSignedUrl(d.storage_path, 120);
