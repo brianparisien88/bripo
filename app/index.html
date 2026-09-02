@@ -7,7 +7,7 @@
 <title>bripo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <style>
   :root{
     --ground:#FBFAF7; --surface:#FFFFFF; --surface2:#F4F2EC;
@@ -38,9 +38,9 @@
   a{color:var(--accent)}
   .wrap{max-width:1180px;margin:0 auto;padding:34px 22px 90px;}
   h1{font-family:var(--serif);font-size:27px;font-weight:600;letter-spacing:-.015em;margin:0;}
-  h2{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;margin:30px 0 10px;}
-  h3{font-family:var(--mono);font-size:11px;margin:20px 0 8px;color:var(--accent);font-weight:500;
-    text-transform:uppercase;letter-spacing:.13em;}
+  h2{font-family:var(--sans);font-size:17px;font-weight:700;letter-spacing:-.01em;margin:30px 0 10px;}
+  h3{font-family:var(--sans);font-size:11px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;
+    text-transform:uppercase;letter-spacing:.09em;}
   .sub{color:var(--ink-soft);font-size:13px;}
   #appSubtitle{font-family:var(--mono);font-size:10.5px;font-weight:500;color:var(--accent);
     text-transform:uppercase;letter-spacing:.14em;margin:0 0 7px;}
@@ -80,7 +80,7 @@
   .tile{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:14px 16px;
     box-shadow:var(--shadow);}
   .tile .k{font-family:var(--mono);font-size:9.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.11em;}
-  .tile .v{font-family:var(--serif);font-size:23px;font-weight:600;margin-top:4px;letter-spacing:-.01em;
+  .tile .v{font-family:var(--sans);font-size:21px;font-weight:600;margin-top:4px;letter-spacing:-.01em;
     font-variant-numeric:tabular-nums;}
 
   .bar{height:8px;background:var(--surface2);border-radius:5px;overflow:hidden;margin:10px 0;}
@@ -109,7 +109,7 @@
   .flag.red{border-color:color-mix(in srgb,var(--loss) 40%,var(--line));} .flag.red .dot{background:var(--loss);}
   .flag.amber{border-color:color-mix(in srgb,var(--warn) 40%,var(--line));} .flag.amber .dot{background:var(--warn);}
   .flag .t{font-weight:600;} .flag .d{color:var(--ink-soft);font-size:12px;}
-  .flag.big{padding:16px 18px;background:var(--accent-wash);} .flag.big .t{font-size:15px;font-family:var(--serif);}
+  .flag.big{padding:16px 18px;background:var(--accent-wash);} .flag.big .t{font-size:15px;font-weight:700;}
   .flag.big.red{background:var(--loss-wash);}
 
   .placeholder{color:var(--ink-faint);border:1px dashed var(--line);border-radius:11px;
