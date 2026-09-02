@@ -76,7 +76,12 @@ Helpers: `public.is_member()`, `public.is_owner()`, `public.schema_catalog()`.
 
 Single-file vanilla-JS dashboard, `supabase-js` from CDN, 10 tabs (Overview,
 Milestones, Budget & payments, Invoices, Permits, Decision log, Change requests,
-Future work, Vendors, Documents). Sign-in shell → `is_member()` gate →
+Future work, Vendors, Documents). **Look** carried from the Trading-AI summary
+page: warm editorial palette (CSS vars `--ground/--surface/--ink/--ink-soft/
+--line/--accent/--loss/--warn` + `--warn` added for the amber pills), theme-aware
+via `prefers-color-scheme` (light default, dark block), Fraunces (serif headings
++ tile values), IBM Plex Sans (body), IBM Plex Mono (labels / table headers /
+numbers) from Google Fonts. Sign-in shell → `is_member()` gate →
 `is_owner()` decides read-only vs editable. Every write goes through RLS and
 also appends to `activity_log`. **EN / ES** via the `t()` helper + `I18N` dict +
 the header toggle (persisted to `localStorage['bripo_lang']`); user-entered data
