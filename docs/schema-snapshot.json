@@ -379,6 +379,12 @@
       "default": "now()",
       "nullable": false,
       "type": "timestamp with time zone"
+    },
+    {
+      "column": "out_of_pocket",
+      "default": "false",
+      "nullable": false,
+      "type": "boolean"
     }
   ],
   "milestones": [
@@ -559,6 +565,12 @@
       "default": "now()",
       "nullable": false,
       "type": "timestamp with time zone"
+    },
+    {
+      "column": "out_of_pocket",
+      "default": "false",
+      "nullable": false,
+      "type": "boolean"
     }
   ],
   "permits": [
