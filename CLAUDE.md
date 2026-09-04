@@ -52,7 +52,8 @@ static dashboard (app/index.html, GitHub Pages)  ◄──  reads live via supab
 Migrations in `supabase/migrations/`:
 - `20260831210000_init.sql` — 13 tables + helpers + RLS.
 - `20260831213000_seeds_storage_hardening.sql` — idempotent seeds (milestones
-  H1–H8, 11 permits, 3 future-work items), the private `documents` Storage bucket
+  H1–H8, 10 permits [see the `20260903090000` migration below for the current
+  list], 3 future-work items), the private `documents` Storage bucket
   with matching member-read / owner-write policies, and the `is_member()` /
   `is_owner()` EXECUTE grants (kept on `anon` on purpose — see the file's note;
   revoking breaks RLS evaluation for logged-out requests).
@@ -64,6 +65,16 @@ Migrations in `supabase/migrations/`:
   but **excluded from every contract-budget calculation** (`paidToDate`,
   `paidFor`, `advancesFor`, `disbursedFor`, `amountDue`). Surfaced separately as
   "Out-of-pocket spend" + "Grand total" (= contract price + out-of-pocket) tiles.
+- `20260903090000_permits_official_checklist.sql` — replaced the contract-derived
+  permit seed list with the owner's official 10-item permit/certificate checklist
+  (adds `permits.category` = `permit` | `non_permit`); preserved existing progress
+  on matched rows (CAR policy, tree-felling permit) via UPDATE rather than
+  delete+reinsert. Dropped "Permiso de Movimiento de Tierra" (folded into the
+  construction permit) and the HOA N-2 deferral approval (not a government
+  permit — no longer tracked here; re-add as an item or via decision_log/
+  milestone notes if you want it back). `MILESTONE_PERMIT_GATES` in
+  `app/index.html` updated to the new seq numbers; the H6 permit gate was removed
+  since nothing in the new checklist backs it.
 
 **Invoices are not payments.** Money totals (Overview, Budget, milestone Paid)
 are `payments`-driven only. An invoice is the paper trail; it moves nothing until
@@ -80,7 +91,8 @@ attach-files sub-row (`entityFiles`).
 warranty math) · `milestones` (H1–H8, seeded) · `payments` (milestone_disbursement
 | material_advance, with the Art 2.5 proof-of-purchase / proof-of-delivery gate)
 · `invoices` + `payment_invoice_links` (many-to-many, never 1:1) · `permits`
-(11 seeded) · `decision_log` (email/whatsapp/manual, `confirmed` gate) ·
+(10 seeded — the owner's official permit/certificate checklist, `category` =
+permit | non_permit) · `decision_log` (email/whatsapp/manual, `confirmed` gate) ·
 `change_requests` (two-party sign-off, no auto budget propagation) ·
 `future_work_items` (3 seeded — NOT contract modifications) · `vendors` ·
 `documents` (Storage metadata) · `activity_log` (audit).

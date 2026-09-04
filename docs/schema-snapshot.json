@@ -621,6 +621,12 @@
       "default": "now()",
       "nullable": false,
       "type": "timestamp with time zone"
+    },
+    {
+      "column": "category",
+      "default": "'permit'::text",
+      "nullable": false,
+      "type": "text"
     }
   ],
   "vendors": [
