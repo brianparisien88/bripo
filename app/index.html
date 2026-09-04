@@ -315,7 +315,7 @@ const I18N = {
     'invoices.toast.linkReq': 'All three fields are required.',
 
     'permits.heading': 'Permits & hard gates',
-    'permits.sub': 'Status + document tracking only. CAR insurance is listed here because it is a hard gate before H1 (Art 5.3).',
+    'permits.sub': 'Official permit / certificate checklist — status + document tracking only, no automation. "Category" flags government permits vs. other required certificates/connections (e.g. the CAR insurance policy, a hard gate before H1, Art 5.3).',
     'permits.responsiblePh': 'contractor / owner',
 
     'decisions.heading': 'Decision / change log', 'decisions.add': '+ Add entry',
@@ -353,7 +353,7 @@ const I18N = {
     'st.unmatched': 'unmatched', 'st.partially_matched': 'partially matched', 'st.matched': 'matched',
     'st.proposed': 'proposed', 'st.rejected': 'rejected', 'st.superseded': 'superseded',
     'st.idea': 'idea', 'st.quoted': 'quoted', 'st.contracted': 'contracted', 'st.declined': 'declined',
-    'st.pending': 'pending',
+    'st.pending': 'pending', 'st.permit': 'permit', 'st.non_permit': 'non-permit',
     'ent.milestone': 'milestone', 'ent.permit': 'permit', 'ent.payment': 'payment',
     'ent.invoice': 'invoice', 'ent.vendor': 'vendor', 'ent.change_request': 'change request',
   },
@@ -476,7 +476,7 @@ const I18N = {
     'invoices.toast.linkReq': 'Los tres campos son obligatorios.',
 
     'permits.heading': 'Permisos y requisitos obligatorios',
-    'permits.sub': 'Solo seguimiento de estado + documentos. El seguro CAR aparece aquí por ser un requisito obligatorio antes de H1 (Art 5.3).',
+    'permits.sub': 'Lista oficial de permisos / certificados — solo seguimiento de estado + documentos, sin automatización. "Categoría" distingue permisos de gobierno de otros certificados/conexiones requeridos (p. ej. la póliza CAR, requisito obligatorio antes de H1, Art 5.3).',
     'permits.responsiblePh': 'contratista / propietario',
 
     'decisions.heading': 'Registro de decisiones / cambios', 'decisions.add': '+ Agregar entrada',
@@ -514,7 +514,7 @@ const I18N = {
     'st.unmatched': 'sin conciliar', 'st.partially_matched': 'parcialmente conciliado', 'st.matched': 'conciliado',
     'st.proposed': 'propuesta', 'st.rejected': 'rechazada', 'st.superseded': 'reemplazada',
     'st.idea': 'idea', 'st.quoted': 'cotizado', 'st.contracted': 'contratado', 'st.declined': 'descartado',
-    'st.pending': 'pendiente',
+    'st.pending': 'pendiente', 'st.permit': 'permiso', 'st.non_permit': 'no es permiso',
     'ent.milestone': 'hito', 'ent.permit': 'permiso', 'ent.payment': 'pago',
     'ent.invoice': 'factura', 'ent.vendor': 'proveedor', 'ent.change_request': 'orden de cambio',
   },
@@ -634,7 +634,7 @@ function scheduleStatus() {
 
 const nextMilestone = () => S.milestones.find(m => m.status !== 'complete') || null;
 
-const MILESTONE_PERMIT_GATES = { H1: [9], H2: [2, 3, 4], H6: [10] };
+const MILESTONE_PERMIT_GATES = { H1: [1], H2: [6, 7] };
 
 function attentionFlags() {
   const flags = [];
@@ -706,6 +706,7 @@ const STATUS_PILL = {
   unmatched: 'dim', partially_matched: 'amber', matched: 'green',
   proposed: 'dim', rejected: 'red', superseded: 'dim',
   idea: 'dim', quoted: 'amber', contracted: 'green', declined: 'dim', pending: 'dim',
+  permit: 'dim', non_permit: 'dim',
 };
 const pill = v => h('span', { class: 'pill ' + (STATUS_PILL[v] || 'dim'), text: stLabel(v) });
 
@@ -1125,10 +1126,12 @@ function viewPermits(v) {
   v.append(h('h2', {}, t('permits.heading')));
   v.append(h('div', { class: 'sub', text: t('permits.sub') }));
   v.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
-    h('thead', {}, h('tr', {}, [t('col.num'), t('col.permitType'), t('col.status'), t('col.completed'), t('col.responsible'), t('col.notes')].map(x => h('th', {}, x)))),
+    h('thead', {}, h('tr', {}, [t('col.num'), t('col.permitType'), t('col.category'), t('col.status'), t('col.completed'), t('col.responsible'), t('col.notes')].map(x => h('th', {}, x)))),
     h('tbody', {}, S.permits.map(p => h('tr', {}, [
       h('td', {}, p.seq ?? '—'),
       h('td', {}, p.type),
+      h('td', {}, selectCell(p.category, ['permit', 'non_permit'],
+        val => upd('permits', { id: p.id }, { category: val }, p.id))),
       h('td', {}, selectCell(p.status, ['not_started', 'submitted', 'under_review', 'approved'],
         val => upd('permits', { id: p.id }, { status: val, updated_at: new Date().toISOString() }, p.id))),
       h('td', {}, dateCell(p.completion_date, val => upd('permits', { id: p.id }, { completion_date: val }, p.id))),
