@@ -666,5 +666,67 @@
       "nullable": true,
       "type": "text"
     }
+  ],
+  "wishlist_items": [
+    {
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": false,
+      "type": "uuid"
+    },
+    {
+      "column": "seq",
+      "default": null,
+      "nullable": false,
+      "type": "integer"
+    },
+    {
+      "column": "label",
+      "default": null,
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "category",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "info",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "price",
+      "default": null,
+      "nullable": true,
+      "type": "numeric"
+    },
+    {
+      "column": "link",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "notes",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "created_at",
+      "default": "now()",
+      "nullable": false,
+      "type": "timestamp with time zone"
+    },
+    {
+      "column": "updated_at",
+      "default": "now()",
+      "nullable": false,
+      "type": "timestamp with time zone"
+    }
   ]
 }

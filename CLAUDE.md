@@ -75,6 +75,14 @@ Migrations in `supabase/migrations/`:
   milestone notes if you want it back). `MILESTONE_PERMIT_GATES` in
   `app/index.html` updated to the new seq numbers; the H6 permit gate was removed
   since nothing in the new checklist backs it.
+- `20260905170000_wishlist_items.sql` — new `wishlist_items` table (`seq`, `label`,
+  `category`, `info`, `price`, `link`, `notes`), same member-read/owner-write RLS
+  as every other table. Seeded with the 56 rows from the owner's "House
+  Wishlist" Google Sheet ("Shopping List" tab), imported 2026-09-05 — materials/
+  fixtures/finishes under consideration, NOT contract items or budget lines
+  (that's `future_work_items` / the Budget tab). One sheet cell (a bamboo-variety
+  note under "Privacy trees") was misfiled under Price/Budget in the source and
+  was moved to `info` since `price` is numeric here.
 
 **Invoices are not payments.** Money totals (Overview, Budget, milestone Paid)
 are `payments`-driven only. An invoice is the paper trail; it moves nothing until
@@ -85,7 +93,7 @@ invoice total − already applied, recipient, milestone, out_of_pocket) and
 row. Documents upload is multi-file (`uploadDocs`); each invoice row has an
 attach-files sub-row (`entityFiles`).
 
-13 tables, all RLS member-read / owner-write, no anon access:
+14 tables, all RLS member-read / owner-write, no anon access:
 
 `app_users` (allow-list) · `contract_meta` (single row 'current' — penalty +
 warranty math) · `milestones` (H1–H8, seeded) · `payments` (milestone_disbursement
@@ -95,15 +103,17 @@ warranty math) · `milestones` (H1–H8, seeded) · `payments` (milestone_disbur
 permit | non_permit) · `decision_log` (email/whatsapp/manual, `confirmed` gate) ·
 `change_requests` (two-party sign-off, no auto budget propagation) ·
 `future_work_items` (3 seeded — NOT contract modifications) · `vendors` ·
-`documents` (Storage metadata) · `activity_log` (audit).
+`documents` (Storage metadata) · `wishlist_items` (56 seeded — materials/fixtures
+shopping list, sortable/searchable table on the Wishlist tab) · `activity_log`
+(audit).
 
 Helpers: `public.is_member()`, `public.is_owner()`, `public.schema_catalog()`.
 
 ## Deterministic logic (no LLM) — BUILT in `app/index.html` (v1)
 
-Single-file vanilla-JS dashboard, `supabase-js` from CDN, 10 tabs (Overview,
+Single-file vanilla-JS dashboard, `supabase-js` from CDN, 11 tabs (Overview,
 Milestones, Budget & payments, Invoices, Permits, Decision log, Change requests,
-Future work, Vendors, Documents). **Look** carried from the Trading-AI summary
+Future work, Vendors, Documents, Wishlist). **Look** carried from the Trading-AI summary
 page: warm editorial palette (CSS vars `--ground/--surface/--ink/--ink-soft/
 --line/--accent/--loss/--warn` + `--warn` added for the amber pills), theme-aware
 via `prefers-color-scheme` (light default, dark block), Fraunces (serif headings
@@ -141,6 +151,17 @@ Budget tab only.
   the next milestone pays.
 - **Alerts** (if built): payment due against an upcoming milestone; permit /
   insurance gate not met for the next milestone. Pure date comparison.
+
+The **Wishlist** tab (`wishlist_items`) is a flat, spreadsheet-like editable
+table — every cell writes straight through RLS like the rest of the app, "+
+Add item" inserts a new row at the next `seq`, and the search box filters
+client-side across label/category/info/link/notes. Column-header clicks toggle
+sort (`wishlistSort`); both that and the search text (`wishlistQuery`) are kept
+as plain module-level JS state (not on `S`) and only re-render the table body,
+not the whole page — so typing in the search box doesn't lose focus the way a
+full `render()` would. Long free-text columns (info/link/notes, which can hold
+multiple newline-separated URLs) use a `<textarea>` cell, not a single-line
+`<input>`, so editing never silently drops embedded newlines.
 
 ## Hard rules
 

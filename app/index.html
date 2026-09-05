@@ -210,7 +210,7 @@ const I18N = {
     'nav.overview': 'Overview', 'nav.milestones': 'Milestones', 'nav.budget': 'Budget & payments',
     'nav.invoices': 'Invoices', 'nav.permits': 'Permits', 'nav.decisions': 'Decision log',
     'nav.changes': 'Change requests', 'nav.future': 'Future work', 'nav.vendors': 'Vendors',
-    'nav.documents': 'Documents',
+    'nav.documents': 'Documents', 'nav.wishlist': 'Wishlist',
 
     'common.cancel': 'Cancel', 'common.saved': 'Saved.', 'common.confirmDelete': 'Delete this row?',
 
@@ -347,6 +347,14 @@ const I18N = {
     'documents.form.entityId': 'Entity id', 'documents.form.entityIdPh': 'e.g. H2',
     'documents.form.upload': 'Upload', 'documents.toast.chooseFile': 'Choose a file.',
 
+    'wishlist.heading': 'Wishlist', 'wishlist.add': '+ Add item',
+    'wishlist.sub': 'Materials, fixtures and finishes under consideration — imported from the owner\'s shopping-list spreadsheet. Sort any column by clicking its header; search filters by keyword across every field.',
+    'wishlist.searchPh': 'Search label, category, notes…',
+    'wishlist.form.saveItem': 'Save item', 'wishlist.toast.req': 'Label is required.',
+    'wishlist.empty': 'No items match.',
+    'col.label': 'Label', 'col.info': 'Additional info', 'col.link': 'Link / vendor',
+    'col.priceBudget': 'Price / budget',
+
     'st.not_started': 'not started', 'st.in_progress': 'in progress', 'st.pending_inspection': 'pending inspection',
     'st.complete': 'complete', 'st.delayed': 'delayed',
     'st.submitted': 'submitted', 'st.under_review': 'under review', 'st.approved': 'approved',
@@ -371,7 +379,7 @@ const I18N = {
     'nav.overview': 'Resumen', 'nav.milestones': 'Hitos', 'nav.budget': 'Presupuesto y pagos',
     'nav.invoices': 'Facturas', 'nav.permits': 'Permisos', 'nav.decisions': 'Registro de decisiones',
     'nav.changes': 'Órdenes de cambio', 'nav.future': 'Trabajo futuro', 'nav.vendors': 'Proveedores',
-    'nav.documents': 'Documentos',
+    'nav.documents': 'Documentos', 'nav.wishlist': 'Lista de deseos',
 
     'common.cancel': 'Cancelar', 'common.saved': 'Guardado.', 'common.confirmDelete': '¿Eliminar este registro?',
 
@@ -508,6 +516,14 @@ const I18N = {
     'documents.form.entityId': 'ID de entidad', 'documents.form.entityIdPh': 'p. ej. H2',
     'documents.form.upload': 'Subir', 'documents.toast.chooseFile': 'Seleccione un archivo.',
 
+    'wishlist.heading': 'Lista de deseos', 'wishlist.add': '+ Agregar ítem',
+    'wishlist.sub': 'Materiales, accesorios y acabados en consideración — importado de la hoja de cálculo de la lista de compras del propietario. Ordene cualquier columna al hacer clic en su encabezado; la búsqueda filtra por palabra clave en todos los campos.',
+    'wishlist.searchPh': 'Buscar por etiqueta, categoría, notas…',
+    'wishlist.form.saveItem': 'Guardar ítem', 'wishlist.toast.req': 'La etiqueta es obligatoria.',
+    'wishlist.empty': 'Ningún ítem coincide.',
+    'col.label': 'Etiqueta', 'col.info': 'Info adicional', 'col.link': 'Enlace / proveedor',
+    'col.priceBudget': 'Precio / presupuesto',
+
     'st.not_started': 'no iniciado', 'st.in_progress': 'en progreso', 'st.pending_inspection': 'pendiente de inspección',
     'st.complete': 'completo', 'st.delayed': 'retrasado',
     'st.submitted': 'enviado', 'st.under_review': 'en revisión', 'st.approved': 'aprobado',
@@ -547,13 +563,17 @@ function toast(text, isErr) {
 const S = {
   isOwner: false, member: false, session: null, tab: 'overview',
   meta: null, milestones: [], payments: [], invoices: [], links: [],
-  permits: [], decisions: [], changes: [], future: [], vendors: [], documents: [],
+  permits: [], decisions: [], changes: [], future: [], vendors: [], documents: [], wishlist: [],
 };
+// Wishlist search/sort are UI-only state, kept outside S so typing in the
+// search box (see renderWishlistTable) never triggers a full app re-render.
+let wishlistQuery = '';
+let wishlistSort = { key: 'seq', dir: 1 };
 
 const TABLES = {
   contract_meta: 'meta', milestones: 'milestones', payments: 'payments',
   invoices: 'invoices', payment_invoice_links: 'links', permits: 'permits',
-  decision_log: 'decisions', change_requests: 'changes',
+  decision_log: 'decisions', change_requests: 'changes', wishlist_items: 'wishlist',
   future_work_items: 'future', vendors: 'vendors', documents: 'documents',
 };
 
@@ -570,6 +590,7 @@ async function loadAll() {
   S.payments.sort((a, b) => (a.date < b.date ? 1 : -1));
   S.invoices.sort((a, b) => (a.date_received < b.date_received ? 1 : -1));
   S.decisions.sort((a, b) => (a.date < b.date ? 1 : -1));
+  S.wishlist.sort((a, b) => a.seq - b.seq);
 }
 
 /* ---------------- writes ---------------- */
@@ -728,6 +749,17 @@ function textCellEdit(value, onchange, ph) {
   if (!S.isOwner) return document.createTextNode(value || '—');
   return h('input', { type: 'text', value: value || '', placeholder: ph || '', onchange: e => onchange(e.target.value || null) });
 }
+// Multi-line variant — for fields that may hold newline-separated notes or
+// multiple URLs; a single-line <input> would silently drop the newlines.
+function textareaCellEdit(value, onchange, ph) {
+  if (!S.isOwner) return h('span', { style: 'white-space:pre-wrap' }, value || '—');
+  return h('textarea', { style: 'min-height:40px', placeholder: ph || '', onchange: e => onchange(e.target.value || null) }, value || '');
+}
+function numCellEdit(value, onchange) {
+  if (!S.isOwner) return document.createTextNode(value == null ? '—' : money2(value));
+  return h('input', { type: 'number', step: '0.01', style: 'width:7em', value: value ?? '',
+    onchange: e => onchange(e.target.value === '' ? null : Number(e.target.value)) });
+}
 const ownerOnly = node => S.isOwner ? node : null;
 const field = (label, node) => h('div', {}, [h('label', {}, label), node]);
 function tableFrom(headers, rows) {
@@ -741,7 +773,7 @@ const tile = (k, val) => h('div', { class: 'tile' }, [h('div', { class: 'k', tex
 /* ---------------- tabs ---------------- */
 const TABS = [
   'overview', 'milestones', 'budget', 'invoices', 'permits',
-  'decisions', 'changes', 'future', 'vendors', 'documents',
+  'decisions', 'changes', 'future', 'vendors', 'documents', 'wishlist',
 ];
 
 function render() {
@@ -753,6 +785,7 @@ function render() {
     overview: viewOverview, milestones: viewMilestones, budget: viewBudget,
     invoices: viewInvoices, permits: viewPermits, decisions: viewDecisions,
     changes: viewChanges, future: viewFuture, vendors: viewVendors, documents: viewDocuments,
+    wishlist: viewWishlist,
   })[S.tab](v);
   if (!S.isOwner) v.prepend(h('div', { class: 'ro-note', text: t('readonly') }));
 }
@@ -1360,6 +1393,89 @@ async function openDoc(d) {
   const { data, error } = await db.storage.from('documents').createSignedUrl(d.storage_path, 120);
   if (error) { toast(error.message, true); return; }
   window.open(data.signedUrl, '_blank');
+}
+
+/* ---------------- Wishlist ---------------- */
+// Search/sort operate on S.wishlist client-side (56 rows, no need for a
+// server round-trip) and re-render only the table host, not the whole app,
+// so the search box never loses focus while typing.
+function filteredSortedWishlist() {
+  const q = wishlistQuery.trim().toLowerCase();
+  let rows = S.wishlist;
+  if (q) rows = rows.filter(it => [it.label, it.category, it.info, it.link, it.notes]
+    .some(f => f != null && String(f).toLowerCase().includes(q)));
+  const { key, dir } = wishlistSort;
+  rows = rows.slice().sort((a, b) => {
+    let av = a[key], bv = b[key];
+    if (key === 'price' || key === 'seq') { av = av == null ? -Infinity : Number(av); bv = bv == null ? -Infinity : Number(bv); }
+    else { av = (av ?? '').toString().toLowerCase(); bv = (bv ?? '').toString().toLowerCase(); }
+    if (av < bv) return -1 * dir;
+    if (av > bv) return 1 * dir;
+    return 0;
+  });
+  return rows;
+}
+function renderWishlistTable(host) {
+  host.innerHTML = '';
+  const rows = filteredSortedWishlist();
+  const sortTh = (key, label) => {
+    const active = wishlistSort.key === key;
+    return h('th', { style: 'cursor:pointer;user-select:none', onclick: () => {
+      wishlistSort = active ? { key, dir: -wishlistSort.dir } : { key, dir: 1 };
+      renderWishlistTable(host);
+    } }, label + (active ? (wishlistSort.dir === 1 ? ' ▲' : ' ▼') : ''));
+  };
+  host.append(h('div', { class: 'tbl-scroll' }, h('table', {}, [
+    h('thead', {}, h('tr', {}, [
+      sortTh('seq', t('col.num')), sortTh('label', t('col.label')), sortTh('category', t('col.category')),
+      sortTh('info', t('col.info')), sortTh('price', t('col.priceBudget')), sortTh('link', t('col.link')),
+      sortTh('notes', t('col.notes')), h('th', {}, ''),
+    ])),
+    h('tbody', {}, rows.map(it => h('tr', {}, [
+      h('td', {}, String(it.seq)),
+      h('td', {}, textCellEdit(it.label, val => upd('wishlist_items', { id: it.id }, { label: val, updated_at: new Date().toISOString() }, it.id))),
+      h('td', {}, textCellEdit(it.category, val => upd('wishlist_items', { id: it.id }, { category: val, updated_at: new Date().toISOString() }, it.id))),
+      h('td', {}, textareaCellEdit(it.info, val => upd('wishlist_items', { id: it.id }, { info: val, updated_at: new Date().toISOString() }, it.id))),
+      h('td', { class: 'num' }, numCellEdit(it.price, val => upd('wishlist_items', { id: it.id }, { price: val, updated_at: new Date().toISOString() }, it.id))),
+      h('td', {}, textareaCellEdit(it.link, val => upd('wishlist_items', { id: it.id }, { link: val, updated_at: new Date().toISOString() }, it.id))),
+      h('td', {}, textareaCellEdit(it.notes, val => upd('wishlist_items', { id: it.id }, { notes: val, updated_at: new Date().toISOString() }, it.id))),
+      h('td', {}, ownerOnly(h('button', { class: 'ghost sm', onclick: () => del('wishlist_items', { id: it.id }, it.id) }, '×'))),
+    ]))),
+  ])));
+  if (!rows.length) host.append(h('div', { class: 'placeholder', text: t('wishlist.empty') }));
+}
+function viewWishlist(v) {
+  v.append(h('div', { class: 'spread' }, [h('h2', {}, t('wishlist.heading')),
+    ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('wishlistForm', wishlistForm) }, t('wishlist.add')))]));
+  v.append(h('div', { class: 'sub', text: t('wishlist.sub') }));
+  v.append(h('div', { id: 'wishlistForm' }));
+  const tableHost = h('div');
+  v.append(h('input', {
+    type: 'search', value: wishlistQuery, placeholder: t('wishlist.searchPh'),
+    style: 'max-width:360px;margin:10px 0;display:block',
+    oninput: e => { wishlistQuery = e.target.value; renderWishlistTable(tableHost); },
+  }));
+  v.append(tableHost);
+  renderWishlistTable(tableHost);
+}
+function wishlistForm(host) {
+  const f = {};
+  host.append(h('div', { class: 'inline-form' }, [
+    field(t('col.label'), h('input', { type: 'text', onchange: e => f.label = e.target.value })),
+    field(t('col.category'), h('input', { type: 'text', onchange: e => f.category = e.target.value || null })),
+    field(t('col.priceBudget'), h('input', { type: 'number', step: '0.01', onchange: e => f.price = e.target.value === '' ? null : Number(e.target.value) })),
+    h('div', { class: 'full' }, [h('label', {}, t('col.info')), h('textarea', { onchange: e => f.info = e.target.value || null })]),
+    h('div', { class: 'full' }, [h('label', {}, t('col.link')), h('textarea', { onchange: e => f.link = e.target.value || null })]),
+    h('div', { class: 'full' }, [h('label', {}, t('col.notes')), h('textarea', { onchange: e => f.notes = e.target.value || null })]),
+    h('div', { class: 'row' }, [
+      h('button', { onclick: async () => {
+        if (!f.label) { toast(t('wishlist.toast.req'), true); return; }
+        const nextSeq = S.wishlist.reduce((m, it) => Math.max(m, it.seq || 0), 0) + 1;
+        if (await ins('wishlist_items', { ...f, seq: nextSeq })) host.innerHTML = '';
+      } }, t('wishlist.form.saveItem')),
+      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, t('common.cancel')),
+    ]),
+  ]));
 }
 
 /* ---------------- form toggle helper ---------------- */
