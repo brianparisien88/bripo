@@ -353,7 +353,7 @@ const I18N = {
     'moodboard.sub': 'Reference images for materials/finishes — stored in the same private "documents" Supabase Storage bucket (same RLS) under a moodboard/ prefix. The 5 most recent uploads show as images; older uploads drop to a linkable list below so the page stays light.',
     'moodboard.form.file': 'Image', 'moodboard.form.label': 'Label',
     'moodboard.form.upload': 'Upload', 'moodboard.toast.chooseFile': 'Choose an image.',
-    'moodboard.untitled': 'Untitled', 'moodboard.remove': 'Remove', 'moodboard.example': 'example',
+    'moodboard.untitled': 'Untitled', 'moodboard.remove': 'Remove',
     'moodboard.olderHeading': 'Older uploads', 'moodboard.olderEmpty': 'No older uploads yet.',
     'moodboard.empty': 'No images yet — upload one to start the moodboard.',
 
@@ -532,7 +532,7 @@ const I18N = {
     'moodboard.sub': 'Imágenes de referencia de materiales/acabados — guardadas en el mismo bucket privado "documents" de Supabase Storage (mismo RLS) bajo el prefijo moodboard/. Las 5 subidas más recientes se muestran como imágenes; las anteriores pasan a una lista con enlace para que la página siga liviana.',
     'moodboard.form.file': 'Imagen', 'moodboard.form.label': 'Etiqueta',
     'moodboard.form.upload': 'Subir', 'moodboard.toast.chooseFile': 'Seleccione una imagen.',
-    'moodboard.untitled': 'Sin título', 'moodboard.remove': 'Eliminar', 'moodboard.example': 'ejemplo',
+    'moodboard.untitled': 'Sin título', 'moodboard.remove': 'Eliminar',
     'moodboard.olderHeading': 'Subidas anteriores', 'moodboard.olderEmpty': 'Aún no hay subidas anteriores.',
     'moodboard.empty': 'Aún no hay imágenes — suba una para iniciar el tablero.',
 
@@ -1535,18 +1535,6 @@ function moodboardImageCard(m, imgStyle) {
 function moodboardPlaceholderCard(heightPx) {
   return h('div', { class: 'placeholder', style: `height:${heightPx}px;display:flex;align-items:center;justify-content:center;margin:0` }, '—');
 }
-// Illustrative-only row for the older-uploads list, shown while there are no
-// real older uploads yet, so the list's look can be checked before it has
-// real rows. Not backed by a document — no link, no delete button.
-function moodboardExampleRow(label, description, date) {
-  return h('div', { class: 'spread', style: 'padding:9px 0;border-bottom:1px solid var(--line-soft);opacity:.65' }, [
-    h('div', {}, [
-      h('div', {}, [label, h('span', { class: 'pill dim', style: 'margin-left:8px' }, t('moodboard.example'))]),
-      h('div', { class: 'sub', style: 'font-size:12px' }, description),
-    ]),
-    h('span', { class: 'sub', text: date }),
-  ]);
-}
 function viewMoodboard(v) {
   v.append(h('div', { class: 'spread' }, [h('h2', {}, t('moodboard.heading')),
     ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('moodboardForm', moodboardForm) }, t('moodboard.add')))]));
@@ -1590,10 +1578,6 @@ function viewMoodboard(v) {
     })));
   } else {
     v.append(h('div', { class: 'placeholder', text: t('moodboard.olderEmpty') }));
-    v.append(h('div', { style: 'margin-top:10px' }, [
-      moodboardExampleRow('Bathroom finishes reference', 'Kaledonia sintered stone — wall & floor (Wishlist #16–18)', '2026-08-20'),
-      moodboardExampleRow('Exterior stone palette', 'Basalt gravel + volcanic stone, driveway / social area options', '2026-08-15'),
-    ]));
   }
 }
 
