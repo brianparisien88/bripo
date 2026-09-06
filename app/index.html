@@ -1183,21 +1183,34 @@ function viewDecisions(v) {
   const unconfirmed = S.decisions.filter(d => !d.confirmed);
   if (unconfirmed.length) {
     v.append(h('h3', {}, t('decisions.awaiting', { n: unconfirmed.length })));
-    v.append(decisionTable(unconfirmed));
+    v.append(decisionTable(unconfirmed, true));
   }
   v.append(h('h3', {}, t('decisions.confirmed')));
-  v.append(decisionTable(S.decisions.filter(d => d.confirmed)));
+  v.append(decisionTable(S.decisions.filter(d => d.confirmed), false));
 }
-function decisionTable(rows) {
+// editable=true (awaiting-confirmation rows) renders inline-editable cells;
+// once a decision is confirmed it's the record of what was agreed, so those
+// rows stay plain text — only the confirmed checkbox and delete still work.
+function decisionTable(rows, editable) {
   if (!rows.length) return h('div', { class: 'placeholder', text: t('decisions.nothing') });
   return h('div', { class: 'tbl-scroll' }, h('table', {}, [
     h('thead', {}, h('tr', {}, [t('col.date'), t('col.source'), t('col.party'), t('col.summary'), t('col.resolves'), t('col.confirmed'), ''].map(x => h('th', {}, x)))),
     h('tbody', {}, rows.map(d => h('tr', {}, [
-      h('td', {}, d.date),
-      h('td', {}, t('source.' + d.source, {}) || d.source),
-      h('td', {}, d.party || '—'),
-      h('td', {}, d.summary),
-      h('td', {}, d.resolves || '—'),
+      h('td', {}, editable
+        ? dateCell(d.date, val => upd('decision_log', { id: d.id }, { date: val }, d.id))
+        : d.date),
+      h('td', {}, editable
+        ? selectCell(d.source, ['whatsapp', 'email', 'manual', 'other'], val => upd('decision_log', { id: d.id }, { source: val }, d.id))
+        : (t('source.' + d.source, {}) || d.source)),
+      h('td', {}, editable
+        ? textCellEdit(d.party, val => upd('decision_log', { id: d.id }, { party: val }, d.id), t('decisions.form.partyPh'))
+        : (d.party || '—')),
+      h('td', {}, editable
+        ? textareaCellEdit(d.summary, val => upd('decision_log', { id: d.id }, { summary: val }, d.id))
+        : d.summary),
+      h('td', {}, editable
+        ? textCellEdit(d.resolves, val => upd('decision_log', { id: d.id }, { resolves: val }, d.id), t('decisions.form.resolvesPh'))
+        : (d.resolves || '—')),
       h('td', {}, checkCell(d.confirmed, val => upd('decision_log', { id: d.id }, { confirmed: val }, d.id))),
       h('td', {}, ownerOnly(h('button', { class: 'ghost sm', onclick: () => del('decision_log', { id: d.id }, d.id) }, '×'))),
     ]))),
@@ -1608,7 +1621,19 @@ $('loginBtn').addEventListener('click', async () => {
 // No self-signup. Accounts are created by the owner in the Supabase dashboard
 // (Authentication → Add user) and then allow-listed in app_users.
 $('logoutBtn').addEventListener('click', async () => { await db.auth.signOut(); location.reload(); });
-db.auth.onAuthStateChange(() => refresh());
+// supabase-js silently re-validates the session whenever the tab regains
+// focus, firing this callback with the *same* signed-in user. A full
+// refresh() there would tear down and rebuild the page — closing any open
+// inline form (e.g. "+ Add item") — for no reason, since nothing about the
+// signed-in identity changed. Only re-render when the user actually changes
+// (sign in, sign out, switch accounts); otherwise just keep S.session fresh.
+let authedUserId = null;
+db.auth.onAuthStateChange((event, session) => {
+  const uid = session?.user?.id ?? null;
+  if (uid === authedUserId) { S.session = session; return; }
+  authedUserId = uid;
+  refresh();
+});
 
 renderLang();
 applyStaticText();
