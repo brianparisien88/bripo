@@ -212,7 +212,8 @@ const I18N = {
     'nav.changes': 'Change requests', 'nav.future': 'Future work', 'nav.vendors': 'Vendors',
     'nav.documents': 'Documents', 'nav.wishlist': 'Wishlist',
 
-    'common.cancel': 'Cancel', 'common.save': 'Save', 'common.saved': 'Saved.', 'common.confirmDelete': 'Delete this row?',
+    'common.cancel': 'Cancel', 'common.saved': 'Saved.', 'common.confirmDelete': 'Delete this row?',
+    'common.editRow': 'Edit row', 'common.done': 'Done',
 
     'col.date': 'Date', 'col.party': 'Party', 'col.summary': 'Summary', 'col.resolves': 'Resolves',
     'col.source': 'Source', 'col.confirmed': 'Confirmed', 'col.status': 'Status',
@@ -351,7 +352,7 @@ const I18N = {
     'wishlist.sub': 'Materials, fixtures and finishes under consideration — imported from the owner\'s shopping-list spreadsheet. Sort any column by clicking its header; search filters by keyword across every field.',
     'wishlist.searchPh': 'Search label, category, notes…',
     'wishlist.form.saveItem': 'Save item', 'wishlist.toast.req': 'Label is required.',
-    'wishlist.empty': 'No items match.', 'wishlist.editLink': 'Edit link',
+    'wishlist.empty': 'No items match.',
     'col.label': 'Label', 'col.info': 'Additional info', 'col.link': 'Link / vendor',
     'col.priceBudget': 'Price / budget',
 
@@ -381,7 +382,8 @@ const I18N = {
     'nav.changes': 'Órdenes de cambio', 'nav.future': 'Trabajo futuro', 'nav.vendors': 'Proveedores',
     'nav.documents': 'Documentos', 'nav.wishlist': 'Lista de deseos',
 
-    'common.cancel': 'Cancelar', 'common.save': 'Guardar', 'common.saved': 'Guardado.', 'common.confirmDelete': '¿Eliminar este registro?',
+    'common.cancel': 'Cancelar', 'common.saved': 'Guardado.', 'common.confirmDelete': '¿Eliminar este registro?',
+    'common.editRow': 'Editar fila', 'common.done': 'Listo',
 
     'col.date': 'Fecha', 'col.party': 'Parte', 'col.summary': 'Resumen', 'col.resolves': 'Resuelve',
     'col.source': 'Fuente', 'col.confirmed': 'Confirmado', 'col.status': 'Estado',
@@ -520,7 +522,7 @@ const I18N = {
     'wishlist.sub': 'Materiales, accesorios y acabados en consideración — importado de la hoja de cálculo de la lista de compras del propietario. Ordene cualquier columna al hacer clic en su encabezado; la búsqueda filtra por palabra clave en todos los campos.',
     'wishlist.searchPh': 'Buscar por etiqueta, categoría, notas…',
     'wishlist.form.saveItem': 'Guardar ítem', 'wishlist.toast.req': 'La etiqueta es obligatoria.',
-    'wishlist.empty': 'Ningún ítem coincide.', 'wishlist.editLink': 'Editar enlace',
+    'wishlist.empty': 'Ningún ítem coincide.',
     'col.label': 'Etiqueta', 'col.info': 'Info adicional', 'col.link': 'Enlace / proveedor',
     'col.priceBudget': 'Precio / presupuesto',
 
@@ -751,8 +753,9 @@ function textCellEdit(value, onchange, ph) {
 }
 // Multi-line variant — for fields that may hold newline-separated notes or
 // multiple URLs; a single-line <input> would silently drop the newlines.
+const plainMultiline = value => h('span', { style: 'white-space:pre-wrap' }, value || '—');
 function textareaCellEdit(value, onchange, ph) {
-  if (!S.isOwner) return h('span', { style: 'white-space:pre-wrap' }, value || '—');
+  if (!S.isOwner) return plainMultiline(value);
   return h('textarea', { style: 'min-height:40px', placeholder: ph || '', onchange: e => onchange(e.target.value || null) }, value || '');
 }
 function numCellEdit(value, onchange) {
@@ -1188,32 +1191,44 @@ function viewDecisions(v) {
   v.append(h('h3', {}, t('decisions.confirmed')));
   v.append(decisionTable(S.decisions.filter(d => d.confirmed), false));
 }
-// editable=true (awaiting-confirmation rows) renders inline-editable cells;
-// once a decision is confirmed it's the record of what was agreed, so those
-// rows stay plain text — only the confirmed checkbox and delete still work.
-function decisionTable(rows, editable) {
+// Rows in the awaiting-confirmation table render as plain text, same as
+// confirmed rows, until the pencil is clicked — then that one row switches
+// to inline-editable cells until the checkmark switches it back. Confirmed
+// rows never get a pencil at all; once a decision is confirmed it's the
+// settled record, so only the confirmed checkbox and delete still work.
+let decisionRowEditing = new Set();
+function decisionTable(rows, allowEdit) {
   if (!rows.length) return h('div', { class: 'placeholder', text: t('decisions.nothing') });
   return h('div', { class: 'tbl-scroll' }, h('table', {}, [
     h('thead', {}, h('tr', {}, [t('col.date'), t('col.source'), t('col.party'), t('col.summary'), t('col.resolves'), t('col.confirmed'), ''].map(x => h('th', {}, x)))),
-    h('tbody', {}, rows.map(d => h('tr', {}, [
-      h('td', {}, editable
-        ? dateCell(d.date, val => upd('decision_log', { id: d.id }, { date: val }, d.id))
-        : d.date),
-      h('td', {}, editable
-        ? selectCell(d.source, ['whatsapp', 'email', 'manual', 'other'], val => upd('decision_log', { id: d.id }, { source: val }, d.id))
-        : (t('source.' + d.source, {}) || d.source)),
-      h('td', {}, editable
-        ? textCellEdit(d.party, val => upd('decision_log', { id: d.id }, { party: val }, d.id), t('decisions.form.partyPh'))
-        : (d.party || '—')),
-      h('td', {}, editable
-        ? textareaCellEdit(d.summary, val => upd('decision_log', { id: d.id }, { summary: val }, d.id))
-        : d.summary),
-      h('td', {}, editable
-        ? textCellEdit(d.resolves, val => upd('decision_log', { id: d.id }, { resolves: val }, d.id), t('decisions.form.resolvesPh'))
-        : (d.resolves || '—')),
-      h('td', {}, checkCell(d.confirmed, val => upd('decision_log', { id: d.id }, { confirmed: val }, d.id))),
-      h('td', {}, ownerOnly(h('button', { class: 'ghost sm', onclick: () => del('decision_log', { id: d.id }, d.id) }, '×'))),
-    ]))),
+    h('tbody', {}, rows.map(d => {
+      const editing = allowEdit && S.isOwner && decisionRowEditing.has(d.id);
+      return h('tr', {}, [
+        h('td', {}, editing
+          ? dateCell(d.date, val => upd('decision_log', { id: d.id }, { date: val }, d.id))
+          : d.date),
+        h('td', {}, editing
+          ? selectCell(d.source, ['whatsapp', 'email', 'manual', 'other'], val => upd('decision_log', { id: d.id }, { source: val }, d.id))
+          : (t('source.' + d.source, {}) || d.source)),
+        h('td', {}, editing
+          ? textCellEdit(d.party, val => upd('decision_log', { id: d.id }, { party: val }, d.id), t('decisions.form.partyPh'))
+          : (d.party || '—')),
+        h('td', {}, editing
+          ? textareaCellEdit(d.summary, val => upd('decision_log', { id: d.id }, { summary: val }, d.id))
+          : plainMultiline(d.summary)),
+        h('td', {}, editing
+          ? textCellEdit(d.resolves, val => upd('decision_log', { id: d.id }, { resolves: val }, d.id), t('decisions.form.resolvesPh'))
+          : (d.resolves || '—')),
+        h('td', {}, checkCell(d.confirmed, val => { decisionRowEditing.delete(d.id); upd('decision_log', { id: d.id }, { confirmed: val }, d.id); })),
+        h('td', {}, ownerOnly(h('div', { class: 'row', style: 'gap:4px' }, [
+          allowEdit ? h('button', { class: 'ghost sm', title: t(editing ? 'common.done' : 'common.editRow'), onclick: () => {
+            editing ? decisionRowEditing.delete(d.id) : decisionRowEditing.add(d.id);
+            render();
+          } }, editing ? '✓' : '✎') : null,
+          h('button', { class: 'ghost sm', onclick: () => del('decision_log', { id: d.id }, d.id) }, '×'),
+        ]))),
+      ]);
+    })),
   ]));
 }
 function decisionForm(host) {
@@ -1412,10 +1427,11 @@ async function openDoc(d) {
 // Search/sort operate on S.wishlist client-side (56 rows, no need for a
 // server round-trip) and re-render only the table host, not the whole app,
 // so the search box never loses focus while typing.
-// Which rows currently have their Link cell open for editing — link is
-// read-only (rendered as clickable URLs) until the pencil is clicked, so a
-// stray click doesn't turn a URL into an edit box.
-let wishlistLinkEditing = new Set();
+// Rows render as plain text (like a normal table) until the pencil is
+// clicked, which switches that one row to inline-editable cells; the
+// checkmark switches it back. Keeps the table readable while still letting
+// every field be edited.
+let wishlistRowEditing = new Set();
 const wishlistCategories = () =>
   [...new Set(S.wishlist.map(it => it.category).filter(Boolean))].sort((a, b) => a.localeCompare(b));
 const WISHLIST_CATEGORY_LIST = 'wishlistCategoryList';
@@ -1435,37 +1451,6 @@ function renderLinkDisplay(value) {
     /^https?:\/\//i.test(line)
       ? h('a', { href: line, target: '_blank', rel: 'noopener noreferrer' }, line.length > 46 ? line.slice(0, 46) + '…' : line)
       : line)));
-}
-// Read-only link cell (clickable URLs) with a pencil to switch to an
-// editable textarea; explicit save/cancel rather than blur-on-change, since
-// clicking a link or leaving the cell unchanged should never enter edit mode.
-function linkCell(it, host) {
-  if (!S.isOwner) return renderLinkDisplay(it.link);
-  if (wishlistLinkEditing.has(it.id)) {
-    let val = it.link || '';
-    const ta = h('textarea', { style: 'min-height:40px' }, val);
-    ta.addEventListener('input', e => { val = e.target.value; });
-    return h('div', {}, [
-      ta,
-      h('div', { class: 'row', style: 'gap:4px;margin-top:4px' }, [
-        h('button', { class: 'ghost sm', title: t('common.save'), onclick: () => {
-          wishlistLinkEditing.delete(it.id);
-          upd('wishlist_items', { id: it.id }, { link: val || null, updated_at: new Date().toISOString() }, it.id);
-        } }, '✓'),
-        h('button', { class: 'ghost sm', title: t('common.cancel'), onclick: () => {
-          wishlistLinkEditing.delete(it.id);
-          renderWishlistTable(host);
-        } }, '×'),
-      ]),
-    ]);
-  }
-  return h('div', { class: 'row', style: 'gap:6px;align-items:flex-start;flex-wrap:nowrap' }, [
-    renderLinkDisplay(it.link),
-    h('button', { class: 'ghost sm', title: t('wishlist.editLink'), onclick: () => {
-      wishlistLinkEditing.add(it.id);
-      renderWishlistTable(host);
-    } }, '✎'),
-  ]);
 }
 function filteredSortedWishlist() {
   const q = wishlistQuery.trim().toLowerCase();
@@ -1499,16 +1484,38 @@ function renderWishlistTable(host) {
       sortTh('info', t('col.info')), sortTh('price', t('col.priceBudget')), sortTh('link', t('col.link')),
       sortTh('notes', t('col.notes')), h('th', {}, ''),
     ])),
-    h('tbody', {}, rows.map(it => h('tr', {}, [
-      h('td', {}, String(it.seq)),
-      h('td', {}, textCellEdit(it.label, val => upd('wishlist_items', { id: it.id }, { label: val, updated_at: new Date().toISOString() }, it.id))),
-      h('td', {}, textCellEditWithList(it.category, val => upd('wishlist_items', { id: it.id }, { category: val, updated_at: new Date().toISOString() }, it.id), WISHLIST_CATEGORY_LIST)),
-      h('td', {}, textareaCellEdit(it.info, val => upd('wishlist_items', { id: it.id }, { info: val, updated_at: new Date().toISOString() }, it.id))),
-      h('td', { class: 'num' }, numCellEdit(it.price, val => upd('wishlist_items', { id: it.id }, { price: val, updated_at: new Date().toISOString() }, it.id))),
-      h('td', {}, linkCell(it, host)),
-      h('td', {}, textareaCellEdit(it.notes, val => upd('wishlist_items', { id: it.id }, { notes: val, updated_at: new Date().toISOString() }, it.id))),
-      h('td', {}, ownerOnly(h('button', { class: 'ghost sm', onclick: () => del('wishlist_items', { id: it.id }, it.id) }, '×'))),
-    ]))),
+    h('tbody', {}, rows.map(it => {
+      const editing = S.isOwner && wishlistRowEditing.has(it.id);
+      const toggleEdit = () => {
+        editing ? wishlistRowEditing.delete(it.id) : wishlistRowEditing.add(it.id);
+        renderWishlistTable(host);
+      };
+      return h('tr', {}, [
+        h('td', {}, String(it.seq)),
+        h('td', {}, editing
+          ? textCellEdit(it.label, val => upd('wishlist_items', { id: it.id }, { label: val, updated_at: new Date().toISOString() }, it.id))
+          : (it.label || '—')),
+        h('td', {}, editing
+          ? textCellEditWithList(it.category, val => upd('wishlist_items', { id: it.id }, { category: val, updated_at: new Date().toISOString() }, it.id), WISHLIST_CATEGORY_LIST)
+          : (it.category || '—')),
+        h('td', {}, editing
+          ? textareaCellEdit(it.info, val => upd('wishlist_items', { id: it.id }, { info: val, updated_at: new Date().toISOString() }, it.id))
+          : plainMultiline(it.info)),
+        h('td', { class: 'num' }, editing
+          ? numCellEdit(it.price, val => upd('wishlist_items', { id: it.id }, { price: val, updated_at: new Date().toISOString() }, it.id))
+          : money2(it.price)),
+        h('td', {}, editing
+          ? textareaCellEdit(it.link, val => upd('wishlist_items', { id: it.id }, { link: val, updated_at: new Date().toISOString() }, it.id))
+          : renderLinkDisplay(it.link)),
+        h('td', {}, editing
+          ? textareaCellEdit(it.notes, val => upd('wishlist_items', { id: it.id }, { notes: val, updated_at: new Date().toISOString() }, it.id))
+          : plainMultiline(it.notes)),
+        h('td', {}, ownerOnly(h('div', { class: 'row', style: 'gap:4px' }, [
+          h('button', { class: 'ghost sm', title: t(editing ? 'common.done' : 'common.editRow'), onclick: toggleEdit }, editing ? '✓' : '✎'),
+          h('button', { class: 'ghost sm', onclick: () => del('wishlist_items', { id: it.id }, it.id) }, '×'),
+        ]))),
+      ]);
+    })),
   ])));
   if (!rows.length) host.append(h('div', { class: 'placeholder', text: t('wishlist.empty') }));
 }
