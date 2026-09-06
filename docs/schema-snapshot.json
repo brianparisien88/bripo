@@ -247,6 +247,18 @@
       "default": "now()",
       "nullable": false,
       "type": "timestamp with time zone"
+    },
+    {
+      "column": "calendar_event_id",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "calendar_event_link",
+      "default": null,
+      "nullable": true,
+      "type": "text"
     }
   ],
   "documents": [

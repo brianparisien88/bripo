@@ -230,6 +230,7 @@ const I18N = {
     'col.pazYSalvo': 'Paz y Salvo', 'col.dirDeObra': 'Dir. de Obra',
     'col.permitType': 'Permit / approval', 'col.submitted': 'Submitted', 'col.description': 'Description',
     'col.name': 'Name', 'col.role': 'Role', 'col.phone': 'Phone', 'col.email': 'Email', 'col.num': '#',
+    'col.calendar': 'Calendar', 'decisions.calendarLinkTitle': 'Open Google Calendar reminder',
     'col.offContract': 'Off-contract',
     'overview.tile.offContract': 'Out-of-pocket spend', 'overview.tile.grandTotal': 'Grand total',
     'files.label': 'Files:', 'files.none': 'none attached', 'files.upload': 'Attach file',
@@ -400,6 +401,7 @@ const I18N = {
     'col.pazYSalvo': 'Paz y Salvo', 'col.dirDeObra': 'Dir. de Obra',
     'col.permitType': 'Permiso / aprobación', 'col.submitted': 'Enviada', 'col.description': 'Descripción',
     'col.name': 'Nombre', 'col.role': 'Rol', 'col.phone': 'Teléfono', 'col.email': 'Correo', 'col.num': '#',
+    'col.calendar': 'Calendario', 'decisions.calendarLinkTitle': 'Abrir recordatorio de Google Calendar',
     'col.offContract': 'Fuera de contrato',
     'overview.tile.offContract': 'Gasto de bolsillo', 'overview.tile.grandTotal': 'Total general',
     'files.label': 'Archivos:', 'files.none': 'ninguno adjunto', 'files.upload': 'Adjuntar archivo',
@@ -1200,7 +1202,7 @@ let decisionRowEditing = new Set();
 function decisionTable(rows, allowEdit) {
   if (!rows.length) return h('div', { class: 'placeholder', text: t('decisions.nothing') });
   return h('div', { class: 'tbl-scroll' }, h('table', {}, [
-    h('thead', {}, h('tr', {}, [t('col.date'), t('col.source'), t('col.party'), t('col.summary'), t('col.resolves'), t('col.confirmed'), ''].map(x => h('th', {}, x)))),
+    h('thead', {}, h('tr', {}, [t('col.date'), t('col.source'), t('col.party'), t('col.summary'), t('col.resolves'), t('col.calendar'), t('col.confirmed'), ''].map(x => h('th', {}, x)))),
     h('tbody', {}, rows.map(d => {
       const editing = allowEdit && S.isOwner && decisionRowEditing.has(d.id);
       return h('tr', {}, [
@@ -1219,6 +1221,9 @@ function decisionTable(rows, allowEdit) {
         h('td', {}, editing
           ? textCellEdit(d.resolves, val => upd('decision_log', { id: d.id }, { resolves: val }, d.id), t('decisions.form.resolvesPh'))
           : (d.resolves || '—')),
+        h('td', {}, d.calendar_event_link
+          ? h('a', { href: d.calendar_event_link, target: '_blank', rel: 'noopener noreferrer', title: t('decisions.calendarLinkTitle') }, '📅')
+          : '—'),
         h('td', {}, checkCell(d.confirmed, val => { decisionRowEditing.delete(d.id); upd('decision_log', { id: d.id }, { confirmed: val }, d.id); })),
         h('td', {}, ownerOnly(h('div', { class: 'row', style: 'gap:4px' }, [
           allowEdit ? h('button', { class: 'ghost sm', title: t(editing ? 'common.done' : 'common.editRow'), onclick: () => {
