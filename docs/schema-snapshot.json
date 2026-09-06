@@ -479,6 +479,38 @@
       "type": "timestamp with time zone"
     }
   ],
+  "moodboard_images": [
+    {
+      "column": "id",
+      "default": "gen_random_uuid()",
+      "nullable": false,
+      "type": "uuid"
+    },
+    {
+      "column": "storage_path",
+      "default": null,
+      "nullable": false,
+      "type": "text"
+    },
+    {
+      "column": "label",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "description",
+      "default": null,
+      "nullable": true,
+      "type": "text"
+    },
+    {
+      "column": "uploaded_at",
+      "default": "now()",
+      "nullable": false,
+      "type": "timestamp with time zone"
+    }
+  ],
   "payment_invoice_links": [
     {
       "column": "payment_id",
