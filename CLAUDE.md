@@ -83,6 +83,10 @@ Migrations in `supabase/migrations/`:
   (that's `future_work_items` / the Budget tab). One sheet cell (a bamboo-variety
   note under "Privacy trees") was misfiled under Price/Budget in the source and
   was moved to `info` since `price` is numeric here.
+- `20260906123000_decision_log_calendar_event.sql` — `decision_log.calendar_event_id`
+  + `calendar_event_link` (both nullable text). Written and cleared by an
+  out-of-band Claude Code Routine, not by the dashboard — see "Decision log ↔
+  Google Calendar sync" below.
 
 **Invoices are not payments.** Money totals (Overview, Budget, milestone Paid)
 are `payments`-driven only. An invoice is the paper trail; it moves nothing until
@@ -151,6 +155,22 @@ Budget tab only.
   the next milestone pays.
 - **Alerts** (if built): payment due against an upcoming milestone; permit /
   insurance gate not met for the next milestone. Pure date comparison.
+
+### Decision log ↔ Google Calendar sync
+
+Still no sync job, backend, webhook, or Edge Function *in the app* — this is a
+recurring **Claude Code Routine** (a scheduled trigger, external to
+`app/index.html` and to GitHub Pages/Supabase) that polls `decision_log` and:
+one-way mirrors each unconfirmed row to a 1:00–1:30pm `America/Panama` event
+on the owner's primary Google Calendar (`brianparisien@gmail.com`), storing
+the event's id/htmlLink back on the row (`calendar_event_id` /
+`calendar_event_link`) so a later edit updates the same event instead of
+duplicating it; deletes the event and clears both columns once the row is
+confirmed (or if the row itself is deleted while still unconfirmed). The
+dashboard only *displays* `calendar_event_link` (a 📅 link on the Decision log
+tab) — it never creates, edits, or deletes calendar events itself, and a
+signed-in owner editing a row's date/summary/party/resolves takes effect on
+the next Routine run, not instantly.
 
 The **Wishlist** tab (`wishlist_items`) is a flat, spreadsheet-like editable
 table — every cell writes straight through RLS like the rest of the app, "+
