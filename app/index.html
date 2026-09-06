@@ -1608,7 +1608,19 @@ $('loginBtn').addEventListener('click', async () => {
 // No self-signup. Accounts are created by the owner in the Supabase dashboard
 // (Authentication → Add user) and then allow-listed in app_users.
 $('logoutBtn').addEventListener('click', async () => { await db.auth.signOut(); location.reload(); });
-db.auth.onAuthStateChange(() => refresh());
+// supabase-js silently re-validates the session whenever the tab regains
+// focus, firing this callback with the *same* signed-in user. A full
+// refresh() there would tear down and rebuild the page — closing any open
+// inline form (e.g. "+ Add item") — for no reason, since nothing about the
+// signed-in identity changed. Only re-render when the user actually changes
+// (sign in, sign out, switch accounts); otherwise just keep S.session fresh.
+let authedUserId = null;
+db.auth.onAuthStateChange((event, session) => {
+  const uid = session?.user?.id ?? null;
+  if (uid === authedUserId) { S.session = session; return; }
+  authedUserId = uid;
+  refresh();
+});
 
 renderLang();
 applyStaticText();
