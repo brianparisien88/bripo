@@ -87,6 +87,13 @@ Migrations in `supabase/migrations/`:
   + `calendar_event_link` (both nullable text). Written and cleared by an
   out-of-band Claude Code Routine, not by the dashboard — see "Decision log ↔
   Google Calendar sync" below.
+- `20260906130000_moodboard_images.sql` — new `moodboard_images` table
+  (`storage_path`, `label`, `description`, `uploaded_at`), same member-read/
+  owner-write RLS as every other table. No new Storage bucket: images live in
+  the existing private `documents` bucket under a `moodboard/` path prefix, so
+  no new bucket policy was needed. Not yet applied to the live project — apply
+  it (`mcp__Supabase__apply_migration` or the Supabase dashboard) and then
+  regenerate `docs/schema-snapshot.json` per "Hard rules" below.
 
 **Invoices are not payments.** Money totals (Overview, Budget, milestone Paid)
 are `payments`-driven only. An invoice is the paper trail; it moves nothing until
@@ -97,7 +104,7 @@ invoice total − already applied, recipient, milestone, out_of_pocket) and
 row. Documents upload is multi-file (`uploadDocs`); each invoice row has an
 attach-files sub-row (`entityFiles`).
 
-14 tables, all RLS member-read / owner-write, no anon access:
+15 tables, all RLS member-read / owner-write, no anon access:
 
 `app_users` (allow-list) · `contract_meta` (single row 'current' — penalty +
 warranty math) · `milestones` (H1–H8, seeded) · `payments` (milestone_disbursement
@@ -108,16 +115,17 @@ permit | non_permit) · `decision_log` (email/whatsapp/manual, `confirmed` gate)
 `change_requests` (two-party sign-off, no auto budget propagation) ·
 `future_work_items` (3 seeded — NOT contract modifications) · `vendors` ·
 `documents` (Storage metadata) · `wishlist_items` (56 seeded — materials/fixtures
-shopping list, sortable/searchable table on the Wishlist tab) · `activity_log`
-(audit).
+shopping list, sortable/searchable table on the Wishlist tab) ·
+`moodboard_images` (image upload metadata for the Moodboard tab, Storage-backed
+same as `documents`) · `activity_log` (audit).
 
 Helpers: `public.is_member()`, `public.is_owner()`, `public.schema_catalog()`.
 
 ## Deterministic logic (no LLM) — BUILT in `app/index.html` (v1)
 
-Single-file vanilla-JS dashboard, `supabase-js` from CDN, 11 tabs (Overview,
+Single-file vanilla-JS dashboard, `supabase-js` from CDN, 12 tabs (Overview,
 Milestones, Budget & payments, Invoices, Permits, Decision log, Change requests,
-Future work, Vendors, Documents, Wishlist). **Look** carried from the Trading-AI summary
+Future work, Vendors, Documents, Moodboard, Wishlist). **Look** carried from the Trading-AI summary
 page: warm editorial palette (CSS vars `--ground/--surface/--ink/--ink-soft/
 --line/--accent/--loss/--warn` + `--warn` added for the amber pills), theme-aware
 via `prefers-color-scheme` (light default, dark block), Fraunces (serif headings
@@ -183,6 +191,21 @@ full `render()` would. Long free-text columns (info/link/notes, which can hold
 multiple newline-separated URLs) use a `<textarea>` cell, not a single-line
 `<input>`, so editing never silently drops embedded newlines.
 
+The **Moodboard** tab (`moodboard_images`) uploads image files straight into the
+existing private `documents` Storage bucket under a `moodboard/` path prefix
+(no new bucket) and stores the metadata row (`label`, `description`,
+`storage_path`, `uploaded_at`). The 5 most recently uploaded images (sorted by
+`uploaded_at` desc in `loadAll`) render as pictures — the newest large at top,
+the next four 2-per-row below via short-lived (1hr) signed URLs fetched
+per-image; anything older drops to a plain linkable list (120s signed URL on
+click) so the tab isn't fetching an unbounded number of signed URLs. There is
+no image-resizing/compression on upload — large source files are stored as-is.
+Deleting an image removes the Storage object first, then the metadata row, so
+a failed Storage delete never leaves an orphaned row. While there are fewer
+than 5 real uploads the grid pads out with dashed placeholder tiles (so the
+2-per-row layout doesn't collapse), and while there are no older uploads the
+list shows two clearly-marked, non-interactive example rows — both purely
+presentational, not real rows in `moodboard_images`.
 ## Hard rules
 
 - **Branch → PR → merge. No pushing to `main`.** `pr-checks.yml` scans the diff

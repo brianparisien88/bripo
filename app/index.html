@@ -210,7 +210,7 @@ const I18N = {
     'nav.overview': 'Overview', 'nav.milestones': 'Milestones', 'nav.budget': 'Budget & payments',
     'nav.invoices': 'Invoices', 'nav.permits': 'Permits', 'nav.decisions': 'Decision log',
     'nav.changes': 'Change requests', 'nav.future': 'Future work', 'nav.vendors': 'Vendors',
-    'nav.documents': 'Documents', 'nav.wishlist': 'Wishlist',
+    'nav.documents': 'Documents', 'nav.moodboard': 'Moodboard', 'nav.wishlist': 'Wishlist',
 
     'common.cancel': 'Cancel', 'common.saved': 'Saved.', 'common.confirmDelete': 'Delete this row?',
     'common.editRow': 'Edit row', 'common.done': 'Done',
@@ -349,6 +349,14 @@ const I18N = {
     'documents.form.entityId': 'Entity id', 'documents.form.entityIdPh': 'e.g. H2',
     'documents.form.upload': 'Upload', 'documents.toast.chooseFile': 'Choose a file.',
 
+    'moodboard.heading': 'Moodboard', 'moodboard.add': '+ Add image',
+    'moodboard.sub': 'Reference images for materials/finishes — stored in the same private "documents" Supabase Storage bucket (same RLS) under a moodboard/ prefix. The 5 most recent uploads show as images; older uploads drop to a linkable list below so the page stays light.',
+    'moodboard.form.file': 'Image', 'moodboard.form.label': 'Label',
+    'moodboard.form.upload': 'Upload', 'moodboard.toast.chooseFile': 'Choose an image.',
+    'moodboard.untitled': 'Untitled', 'moodboard.remove': 'Remove', 'moodboard.example': 'example',
+    'moodboard.olderHeading': 'Older uploads', 'moodboard.olderEmpty': 'No older uploads yet.',
+    'moodboard.empty': 'No images yet — upload one to start the moodboard.',
+
     'wishlist.heading': 'Wishlist', 'wishlist.add': '+ Add item',
     'wishlist.sub': 'Materials, fixtures and finishes under consideration — imported from the owner\'s shopping-list spreadsheet. Sort any column by clicking its header; search filters by keyword across every field.',
     'wishlist.searchPh': 'Search label, category, notes…',
@@ -381,7 +389,7 @@ const I18N = {
     'nav.overview': 'Resumen', 'nav.milestones': 'Hitos', 'nav.budget': 'Presupuesto y pagos',
     'nav.invoices': 'Facturas', 'nav.permits': 'Permisos', 'nav.decisions': 'Registro de decisiones',
     'nav.changes': 'Órdenes de cambio', 'nav.future': 'Trabajo futuro', 'nav.vendors': 'Proveedores',
-    'nav.documents': 'Documentos', 'nav.wishlist': 'Lista de deseos',
+    'nav.documents': 'Documentos', 'nav.moodboard': 'Tablero de inspiración', 'nav.wishlist': 'Lista de deseos',
 
     'common.cancel': 'Cancelar', 'common.saved': 'Guardado.', 'common.confirmDelete': '¿Eliminar este registro?',
     'common.editRow': 'Editar fila', 'common.done': 'Listo',
@@ -520,6 +528,14 @@ const I18N = {
     'documents.form.entityId': 'ID de entidad', 'documents.form.entityIdPh': 'p. ej. H2',
     'documents.form.upload': 'Subir', 'documents.toast.chooseFile': 'Seleccione un archivo.',
 
+    'moodboard.heading': 'Tablero de inspiración', 'moodboard.add': '+ Agregar imagen',
+    'moodboard.sub': 'Imágenes de referencia de materiales/acabados — guardadas en el mismo bucket privado "documents" de Supabase Storage (mismo RLS) bajo el prefijo moodboard/. Las 5 subidas más recientes se muestran como imágenes; las anteriores pasan a una lista con enlace para que la página siga liviana.',
+    'moodboard.form.file': 'Imagen', 'moodboard.form.label': 'Etiqueta',
+    'moodboard.form.upload': 'Subir', 'moodboard.toast.chooseFile': 'Seleccione una imagen.',
+    'moodboard.untitled': 'Sin título', 'moodboard.remove': 'Eliminar', 'moodboard.example': 'ejemplo',
+    'moodboard.olderHeading': 'Subidas anteriores', 'moodboard.olderEmpty': 'Aún no hay subidas anteriores.',
+    'moodboard.empty': 'Aún no hay imágenes — suba una para iniciar el tablero.',
+
     'wishlist.heading': 'Lista de deseos', 'wishlist.add': '+ Agregar ítem',
     'wishlist.sub': 'Materiales, accesorios y acabados en consideración — importado de la hoja de cálculo de la lista de compras del propietario. Ordene cualquier columna al hacer clic en su encabezado; la búsqueda filtra por palabra clave en todos los campos.',
     'wishlist.searchPh': 'Buscar por etiqueta, categoría, notas…',
@@ -567,7 +583,7 @@ function toast(text, isErr) {
 const S = {
   isOwner: false, member: false, session: null, tab: 'overview',
   meta: null, milestones: [], payments: [], invoices: [], links: [],
-  permits: [], decisions: [], changes: [], future: [], vendors: [], documents: [], wishlist: [],
+  permits: [], decisions: [], changes: [], future: [], vendors: [], documents: [], moodboard: [], wishlist: [],
 };
 // Wishlist search/sort are UI-only state, kept outside S so typing in the
 // search box (see renderWishlistTable) never triggers a full app re-render.
@@ -579,6 +595,7 @@ const TABLES = {
   invoices: 'invoices', payment_invoice_links: 'links', permits: 'permits',
   decision_log: 'decisions', change_requests: 'changes', wishlist_items: 'wishlist',
   future_work_items: 'future', vendors: 'vendors', documents: 'documents',
+  moodboard_images: 'moodboard',
 };
 
 async function loadAll() {
@@ -594,6 +611,7 @@ async function loadAll() {
   S.payments.sort((a, b) => (a.date < b.date ? 1 : -1));
   S.invoices.sort((a, b) => (a.date_received < b.date_received ? 1 : -1));
   S.decisions.sort((a, b) => (a.date < b.date ? 1 : -1));
+  S.moodboard.sort((a, b) => (a.uploaded_at < b.uploaded_at ? 1 : -1));
   S.wishlist.sort((a, b) => a.seq - b.seq);
 }
 
@@ -778,7 +796,7 @@ const tile = (k, val) => h('div', { class: 'tile' }, [h('div', { class: 'k', tex
 /* ---------------- tabs ---------------- */
 const TABS = [
   'overview', 'milestones', 'budget', 'invoices', 'permits',
-  'decisions', 'changes', 'future', 'vendors', 'documents', 'wishlist',
+  'decisions', 'changes', 'future', 'vendors', 'documents', 'moodboard', 'wishlist',
 ];
 
 function render() {
@@ -790,7 +808,7 @@ function render() {
     overview: viewOverview, milestones: viewMilestones, budget: viewBudget,
     invoices: viewInvoices, permits: viewPermits, decisions: viewDecisions,
     changes: viewChanges, future: viewFuture, vendors: viewVendors, documents: viewDocuments,
-    wishlist: viewWishlist,
+    moodboard: viewMoodboard, wishlist: viewWishlist,
   })[S.tab](v);
   if (!S.isOwner) v.prepend(h('div', { class: 'ro-note', text: t('readonly') }));
 }
@@ -1426,6 +1444,131 @@ async function openDoc(d) {
   const { data, error } = await db.storage.from('documents').createSignedUrl(d.storage_path, 120);
   if (error) { toast(error.message, true); return; }
   window.open(data.signedUrl, '_blank');
+}
+
+/* ---------------- Moodboard ---------------- */
+// Same private "documents" bucket as the Documents tab, path-prefixed
+// "moodboard/" — no new bucket/policy needed. The 5 most recent uploads
+// (S.moodboard is sorted newest-first in loadAll) render as images: the
+// newest large at top, the next four 2-per-row below. Older uploads drop to
+// a plain linkable list so the tab doesn't grow unbounded signed-URL fetches.
+async function fillSignedSrc(imgEl, path) {
+  const { data, error } = await db.storage.from('documents').createSignedUrl(path, 3600);
+  if (!error) imgEl.src = data.signedUrl;
+}
+async function openMoodboardImage(m) {
+  const { data, error } = await db.storage.from('documents').createSignedUrl(m.storage_path, 120);
+  if (error) { toast(error.message, true); return; }
+  window.open(data.signedUrl, '_blank');
+}
+async function uploadMoodboardImage(file, label, description) {
+  const path = `moodboard/${Date.now()}_${Math.random().toString(36).slice(2, 7)}_${file.name}`.replace(/[^\w.\-/]/g, '_');
+  const { error: upErr } = await db.storage.from('documents').upload(path, file);
+  if (upErr) { toast('Upload: ' + upErr.message, true); return; }
+  const { error } = await db.from('moodboard_images').insert({ storage_path: path, label: label || null, description: description || null });
+  if (error) { toast(error.message, true); return; }
+  await logActivity('moodboard_images', '', 'insert', { label: label || null });
+  toast(t('common.saved'));
+  await loadAll();
+  render();
+}
+// Deletes the Storage object first, then the metadata row — so a failed
+// storage delete never leaves an orphaned row pointing at a removed file.
+async function removeMoodboardImage(m) {
+  if (!confirm(t('common.confirmDelete'))) return;
+  const { error } = await db.storage.from('documents').remove([m.storage_path]);
+  if (error) { toast(error.message, true); return; }
+  await write('delete', 'moodboard_images', { id: m.id }, null, m.id);
+}
+function moodboardForm(host) {
+  const f = {};
+  host.append(h('div', { class: 'inline-form' }, [
+    field(t('moodboard.form.label'), h('input', { type: 'text', onchange: e => f.label = e.target.value || null })),
+    field(t('moodboard.form.file'), h('input', { type: 'file', accept: 'image/*', onchange: e => f.file = e.target.files[0] })),
+    h('div', { class: 'full' }, [h('label', {}, t('col.description')), h('textarea', { onchange: e => f.description = e.target.value || null })]),
+    h('div', { class: 'row' }, [
+      h('button', { onclick: async () => {
+        if (!f.file) { toast(t('moodboard.toast.chooseFile'), true); return; }
+        await uploadMoodboardImage(f.file, f.label, f.description);
+      } }, t('moodboard.form.upload')),
+      h('button', { class: 'ghost', onclick: () => host.innerHTML = '' }, t('common.cancel')),
+    ]),
+  ]));
+}
+function moodboardImageCard(m, imgStyle) {
+  const img = h('img', { style: imgStyle, alt: m.label || '' });
+  const card = h('div', { class: 'card', style: 'max-width:none;padding:0;overflow:hidden' }, [
+    img,
+    h('div', { style: 'padding:12px 16px' }, [
+      h('div', { style: 'font-family:var(--serif);font-weight:600;font-size:15px' }, m.label || t('moodboard.untitled')),
+      m.description ? h('div', { class: 'sub', style: 'margin-top:4px' }, m.description) : null,
+      ownerOnly(h('button', { class: 'ghost sm', style: 'margin-top:8px', onclick: () => removeMoodboardImage(m) }, t('moodboard.remove'))),
+    ]),
+  ]);
+  fillSignedSrc(img, m.storage_path);
+  return card;
+}
+// Empty grid slot — fills the 2-per-row layout while there are fewer than
+// 4 non-hero uploads, so the grid keeps its shape instead of collapsing.
+function moodboardPlaceholderCard(heightPx) {
+  return h('div', { class: 'placeholder', style: `height:${heightPx}px;display:flex;align-items:center;justify-content:center;margin:0` }, '—');
+}
+// Illustrative-only row for the older-uploads list, shown while there are no
+// real older uploads yet, so the list's look can be checked before it has
+// real rows. Not backed by a document — no link, no delete button.
+function moodboardExampleRow(label, description, date) {
+  return h('div', { class: 'spread', style: 'padding:9px 0;border-bottom:1px solid var(--line-soft);opacity:.65' }, [
+    h('div', {}, [
+      h('div', {}, [label, h('span', { class: 'pill dim', style: 'margin-left:8px' }, t('moodboard.example'))]),
+      h('div', { class: 'sub', style: 'font-size:12px' }, description),
+    ]),
+    h('span', { class: 'sub', text: date }),
+  ]);
+}
+function viewMoodboard(v) {
+  v.append(h('div', { class: 'spread' }, [h('h2', {}, t('moodboard.heading')),
+    ownerOnly(h('button', { class: 'sm', onclick: () => toggleForm('moodboardForm', moodboardForm) }, t('moodboard.add')))]));
+  v.append(h('div', { class: 'sub', text: t('moodboard.sub') }));
+  v.append(h('div', { id: 'moodboardForm' }));
+
+  const recent = S.moodboard.slice(0, 5);
+  const older = S.moodboard.slice(5);
+
+  if (!recent.length) {
+    v.append(h('div', { class: 'placeholder', text: t('moodboard.empty') }));
+  } else {
+    const [hero, ...restReal] = recent;
+    const GRID_SLOTS = 4;
+    v.append(h('div', { style: 'margin:14px 0' },
+      moodboardImageCard(hero, 'width:100%;max-height:460px;object-fit:cover;display:block')));
+    v.append(h('div', { style: 'display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:14px 0' }, [
+      ...restReal.slice(0, GRID_SLOTS).map(m => moodboardImageCard(m, 'width:100%;height:220px;object-fit:cover;display:block')),
+      ...Array(Math.max(0, GRID_SLOTS - restReal.length)).fill(0).map(() => moodboardPlaceholderCard(220)),
+    ]));
+  }
+
+  v.append(h('h3', {}, t('moodboard.olderHeading')));
+  if (older.length) {
+    v.append(h('div', {}, older.map(m => h('div', {
+      class: 'spread', style: 'padding:9px 0;border-bottom:1px solid var(--line-soft)',
+    }, [
+      h('div', {}, [
+        h('div', {}, h('a', { href: '#', onclick: async ev => { ev.preventDefault(); await openMoodboardImage(m); } },
+          m.label || m.storage_path.split('/').pop())),
+        m.description ? h('div', { class: 'sub', style: 'font-size:12px' }, m.description) : null,
+      ]),
+      h('div', { class: 'row', style: 'align-items:center' }, [
+        h('span', { class: 'sub', text: (m.uploaded_at || '').slice(0, 10) }),
+        ownerOnly(h('button', { class: 'ghost sm', onclick: () => removeMoodboardImage(m) }, '×')),
+      ]),
+    ]))));
+  } else {
+    v.append(h('div', { class: 'placeholder', text: t('moodboard.olderEmpty') }));
+    v.append(h('div', { style: 'margin-top:10px' }, [
+      moodboardExampleRow('Bathroom finishes reference', 'Kaledonia sintered stone — wall & floor (Wishlist #16–18)', '2026-08-20'),
+      moodboardExampleRow('Exterior stone palette', 'Basalt gravel + volcanic stone, driveway / social area options', '2026-08-15'),
+    ]));
+  }
 }
 
 /* ---------------- Wishlist ---------------- */
