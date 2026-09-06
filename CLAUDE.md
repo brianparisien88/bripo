@@ -194,22 +194,23 @@ multiple newline-separated URLs) use a `<textarea>` cell, not a single-line
 The **Moodboard** tab (`moodboard_images`) uploads image files straight into the
 existing private `documents` Storage bucket under a `moodboard/` path prefix
 (no new bucket) and stores the metadata row (`label`, `description`,
-`storage_path`, `uploaded_at`). The 5 most recently uploaded images (sorted by
-`uploaded_at` desc in `loadAll`) render as pictures — the newest large at top,
-the next four 2-per-row below via short-lived (1hr) signed URLs fetched
-per-image, `object-fit:contain` so nothing is cropped; anything older drops to
-a plain linkable list. Clicking any image (hero, grid, or an older-list link)
-opens the full-size signed URL in a new tab. There is no image-resizing/
-compression on upload — large source files are stored as-is. Every row —
-the 5 recent image cards and every older-list row — is inline-editable via a
-shared `moodboardRowEditing` Set (same pencil-toggle pattern as Decision log/
-Wishlist row-editing): a pencil switches label + description into editable
-fields, a checkmark switches back, and a Remove/× button deletes. Deleting
-removes the Storage object first, then the metadata row, so a failed Storage
-delete never leaves an orphaned row. While there are fewer than 5 real
-uploads the grid pads out with dashed, non-interactive placeholder tiles (so
-the 2-per-row layout doesn't collapse) — the only place with placeholder
-content; the older-list's empty state is just a plain message.
+`storage_path`, `uploaded_at`). The 10 most recently uploaded images (sorted by
+`uploaded_at` desc in `loadAll`, `MOODBOARD_GRID_SIZE`) render as a uniform,
+auto-flowing grid (`grid-template-columns:repeat(auto-fill,minmax(220px,1fr))`,
+all tiles the same size, no hero/featured image) via short-lived (1hr) signed
+URLs fetched per-image, `object-fit:contain` so nothing is cropped; anything
+older drops to a plain linkable list. Clicking any image (grid tile or an
+older-list link) opens the full-size signed URL in a new tab. There is no
+image-resizing/compression on upload — large source files are stored as-is.
+Every row — every grid tile and every older-list row — is inline-editable via
+a shared `moodboardRowEditing` Set (same pencil-toggle pattern as Decision
+log/Wishlist row-editing): a pencil switches label + description into
+editable fields, a checkmark switches back, and a Remove/× button deletes.
+Deleting removes the Storage object first, then the metadata row, so a failed
+Storage delete never leaves an orphaned row. While there are fewer than 10
+real uploads the grid pads out with dashed, non-interactive placeholder tiles
+(so the layout doesn't collapse) — the only place with placeholder content;
+the older-list's empty state is just a plain message.
 ## Hard rules
 
 - **Branch → PR → merge. No pushing to `main`.** `pr-checks.yml` scans the diff
